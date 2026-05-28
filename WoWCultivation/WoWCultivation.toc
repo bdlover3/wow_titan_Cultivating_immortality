@@ -1,0 +1,58 @@
+## Interface: 30300
+## Title: 魔兽修仙传
+## Title-zhCN: 魔兽修仙传
+## Notes: 修仙之路，道阻且长
+## Notes-zhCN: 将魔兽世界化为修仙界
+## Author: XiuxianDev
+## Version: 1.0
+## SavedVariables: WoWCultivationDB
+## SavedVariablesPerCharacter: WoWCultivationCharDB
+
+# Core
+Init.lua
+Core\EventManager.lua
+Core\Database.lua
+Core\Utils.lua
+Core\Config.lua
+
+# Data
+Data\RealmData.lua
+Data\SectData.lua
+Data\BattlegroundData.lua
+Data\MilestoneData.lua
+Data\ProfessionData.lua
+Data\ElixirData.lua
+Data\TitleData.lua
+
+# Locale
+Locale\zhCN.lua
+
+# Modules
+Modules\RealmModule.lua
+Modules\SectModule.lua
+Modules\CurrencyModule.lua
+Modules\TreasureModule.lua
+Modules\ProfessionModule.lua
+Modules\MilestoneModule.lua
+Modules\BattlegroundModule.lua
+Modules\SisterModule.lua
+Modules\ChannelModule.lua
+Modules\DivineSenseModule.lua
+Modules\InnerDemonModule.lua
+Modules\KarmaModule.lua
+Modules\KarmicDestinyModule.lua
+Modules\DaoCompanionModule.lua
+Modules\SpiritVeinModule.lua
+Modules\ElixirModule.lua
+Modules\SpiritBeastModule.lua
+Modules\CultivationLogModule.lua
+Modules\DaoTitleModule.lua
+
+# UI
+UI\Toast.lua
+UI\RealmLabel.lua
+UI\CultivationBar.lua
+UI\SisterModel.lua
+UI\MilestonePopup.lua
+UI\DivineSenseFrame.lua
+UI\MainFrame.lua
