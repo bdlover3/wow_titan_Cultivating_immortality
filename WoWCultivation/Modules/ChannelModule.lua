@@ -41,21 +41,24 @@ function Module:JoinChannel()
 end
 
 function Module:SetupChatFilters()
-    ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER", function(self, event, msg, author, ...)
+    -- 3.80.1: ChatFrame_AddMessageEventFilter 参数 (chatFrame, event, msg, author, ...)
+    -- author 是玩家名字，3.80.1 中 UnitClass 接受 unit token 而非名字
+    ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER", function(chatFrame, event, msg, author, ...)
         local newMsg = msg .. "（" .. author .. "道友传音入密）"
-        return false, newMsg, author, ...
+        return newMsg, author, ...
     end)
 
-    ChatFrame_AddMessageEventFilter("CHAT_MSG_GUILD", function(self, event, msg, author, ...)
-        local _, englishClass = UnitClass(author)
+    ChatFrame_AddMessageEventFilter("CHAT_MSG_GUILD", function(chatFrame, event, msg, author, ...)
+        -- 3.80.1: UnitClass 接受 unit token，用 "player" 获取自己的宗门
+        local _, englishClass = UnitClass("player")
         if englishClass then
             local sectInfo = WoWCultivation.Data.Sect[englishClass]
             if sectInfo then
                 local newMsg = "【" .. sectInfo.name .. "】" .. msg
-                return false, newMsg, author, ...
+                return newMsg, author, ...
             end
         end
-        return false, msg, author, ...
+        return msg, author, ...
     end)
 end
 

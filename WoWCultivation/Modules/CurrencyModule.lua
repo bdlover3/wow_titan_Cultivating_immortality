@@ -13,8 +13,8 @@ end
 function Module:GetSpiritStones()
     local money = GetMoney()
     if not money then return 0, 0, 0 end
-    local spiritStones = floor(money / 10000)
-    local spiritJade = floor((money % 10000) / 100)
+    local spiritStones = math.floor(money / 10000)
+    local spiritJade = math.floor((money % 10000) / 100)
     local spiritDust = money % 100
     return spiritStones, spiritJade, spiritDust
 end
@@ -23,13 +23,13 @@ function Module:GetCurrencyText()
     local gold, silver, copper = self:GetSpiritStones()
     local parts = {}
     if gold > 0 then
-        table.insert(parts, format("|cFFFFD700%d上品灵石|r", gold))
+        table.insert(parts, string.format("|cFFFFD700%d上品灵石|r", gold))
     end
     if silver > 0 then
-        table.insert(parts, format("|cFFC0C0C0%d中品灵石|r", silver))
+        table.insert(parts, string.format("|cFFC0C0C0%d中品灵石|r", silver))
     end
     if copper > 0 or #parts == 0 then
-        table.insert(parts, format("|cFFCD853F%d下品灵石|r", copper))
+        table.insert(parts, string.format("|cFFCD853F%d下品灵石|r", copper))
     end
     return table.concat(parts, " ")
 end
@@ -37,11 +37,11 @@ end
 function Module:GetCurrencyShortText()
     local gold, silver, copper = self:GetSpiritStones()
     if gold > 0 then
-        return format("|cFFFFD700%d|r|cFFC0C0C0灵|r", gold)
+        return string.format("|cFFFFD700%d|r|cFFC0C0C0灵|r", gold)
     elseif silver > 0 then
-        return format("|cFFC0C0C0%d|r|cFFC0C0C0灵|r", silver)
+        return string.format("|cFFC0C0C0%d|r|cFFC0C0C0灵|r", silver)
     else
-        return format("|cFFCD853F%d|r|cFFCD853F灵尘|r", copper)
+        return string.format("|cFFCD853F%d|r|cFFCD853F灵尘|r", copper)
     end
 end
 

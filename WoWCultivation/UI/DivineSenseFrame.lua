@@ -1,3 +1,7 @@
+-- ============================================================
+-- DivineSenseFrame.lua - 神识探查窗口
+-- 目标版本: 3.80.1 — BackdropTemplate + AnimationGroup
+-- ============================================================
 local UI = {}
 UI.name = "DivineSenseFrame"
 WoWCultivation.UI.DivineSenseFrame = UI
@@ -8,8 +12,8 @@ function UI:OnEnable()
     f:SetSize(320, 300)
     f:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
     f:SetBackdrop({
-        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark",
-        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Gold-Border",
+        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
         tile = true,
         tileSize = 16,
         edgeSize = 18,
@@ -33,8 +37,8 @@ function UI:OnEnable()
     headerBg:SetPoint("TOPRIGHT", f, "TOPRIGHT", -8, -8)
     headerBg:SetHeight(36)
     headerBg:SetBackdrop({
-        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark",
-        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Gold-Border",
+        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
         tileSize = 12,
         edgeSize = 10,
         insets = { left = 3, right = 3, top = 3, bottom = 3 }
@@ -101,20 +105,16 @@ end
 
 function UI:Show(data)
     if not self.frame then return end
+    
     data = data or {}
-    self.infoRows[1].value:SetText("|cFFFFFFFF" .. (data.name or "未知") .. "|r")
+    self.infoRows[1].value:SetText("|cFFFFD700" .. (data.name or "未知") .. "|r")
     self.infoRows[2].value:SetText("|cFFAA44FF" .. (data.realm or "凡人") .. "|r")
     self.infoRows[3].value:SetText("|cFF4488FF" .. (data.sect or "散修") .. "|r")
     self.infoRows[4].value:SetText("|cFF44AAFF" .. (data.spiritRoot or "未知灵根") .. "|r")
-    self.infoRows[5].value:SetText("|cFFFF8800" .. (BreakUpLargeNumbers(data.daoPoints) or "0") .. "|r")
+    self.infoRows[5].value:SetText("|cFFFF8800" .. BreakUpLargeNumbers(data.daoPoints or 0) .. "|r")
+    
+    self.frame:SetAlpha(1)
     self.frame:Show()
-
-    local ag = self.frame:CreateAnimationGroup()
-    local fadeIn = ag:CreateAnimation("Alpha")
-    fadeIn:SetFromAlpha(0)
-    fadeIn:SetToAlpha(1)
-    fadeIn:SetDuration(0.25)
-    ag:Play()
 end
 
 function UI:Hide()

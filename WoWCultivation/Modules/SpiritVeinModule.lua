@@ -14,9 +14,7 @@ Module.ZONE_TYPE_MAP = {
 function Module:OnEnable()
     self.enabled = true
     local EM = WoWCultivation.Core.EventManager
-    EM:Register("ZONE_CHANGED_NEW_AREA", function()
-        self:OnZoneChanged()
-    end)
+    -- 3.80.1: ZONE_CHANGED 是最主要区域变更事件
     EM:Register("ZONE_CHANGED", function()
         self:OnZoneChanged()
     end)

@@ -1,3 +1,7 @@
+-- ============================================================
+-- Toast.lua - 浮动提示
+-- 目标版本: 3.80.1 — BackdropTemplate + AnimationGroup
+-- ============================================================
 local UI = {}
 UI.name = "Toast"
 WoWCultivation.UI.Toast = UI
@@ -27,8 +31,8 @@ function UI:CreateToast(text, duration)
     toast:SetSize(320, 40)
     toast:SetPoint("TOP", self.anchor, "TOP", 0, -(index - 1) * 50)
     toast:SetBackdrop({
-        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark",
-        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Gold-Border",
+        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
         tile = true,
         tileSize = 16,
         edgeSize = 16,
@@ -45,8 +49,9 @@ function UI:CreateToast(text, duration)
     fontString:SetWordWrap(true)
     toast.text = fontString
 
+    -- 3.80.1 AnimationGroup 动画
+    toast:Show()
     local ag = toast:CreateAnimationGroup()
-    ag:SetLooping("NONE")
 
     local fadeIn = ag:CreateAnimation("Alpha")
     fadeIn:SetFromAlpha(0)
@@ -54,26 +59,24 @@ function UI:CreateToast(text, duration)
     fadeIn:SetDuration(0.3)
     fadeIn:SetOrder(1)
 
-    local hold = ag:CreateAnimation("Alpha")
-    hold:SetFromAlpha(1)
-    hold:SetToAlpha(1)
-    hold:SetDuration(duration - 0.6)
-    hold:SetOrder(2)
-
     local fadeOut = ag:CreateAnimation("Alpha")
     fadeOut:SetFromAlpha(1)
     fadeOut:SetToAlpha(0)
     fadeOut:SetDuration(0.3)
     fadeOut:SetOrder(3)
 
-    ag:SetScript("OnFinished", function()
-        toast:Hide()
-        self:RemoveToast(toast)
+    -- 中间保持阶段用 C_Timer
+    local holdDuration = duration - 0.6
+    C_Timer.After(0.3 + holdDuration, function()
+        fadeOut:Play()
     end)
 
-    toast.animGroup = ag
-    toast:Show()
-    ag:Play()
+    ag:SetScript("OnFinished", function()
+        toast:Hide()
+        UI:RemoveToast(toast)
+    end)
+
+    fadeIn:Play()
 
     tinsert(self.toasts, toast)
 end

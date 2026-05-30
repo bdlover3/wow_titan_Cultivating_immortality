@@ -34,13 +34,18 @@ function Module:RecordDestiny(eventType, detail)
     local data = WoWCultivationCharDB.karmicDestiny
     if not data then return end
 
+    -- 确保 entries 数组存在
+    if not data.entries then
+        data.entries = {}
+    end
+
     local record = {
         type = eventType,
         detail = detail or "",
         time = time(),
         date = date("%Y-%m-%d %H:%M"),
     }
-    table.insert(data, record)
+    table.insert(data.entries, record)
 
     WoWCultivation:Print("【仙缘际遇】" .. eventType .. " — " .. (detail or ""))
     if WoWCultivation.UI.Toast then
@@ -84,14 +89,15 @@ end
 
 function Module:GetDestinyCount()
     local data = WoWCultivation.Core.DB:GetChar("karmicDestiny")
-    return data and #data or 0
+    if not data or not data.entries then return 0 end
+    return #data.entries
 end
 
 function Module:GetDestinyByType(eventType)
     local data = WoWCultivation.Core.DB:GetChar("karmicDestiny")
-    if not data then return {} end
+    if not data or not data.entries then return {} end
     local result = {}
-    for _, record in ipairs(data) do
+    for _, record in ipairs(data.entries) do
         if record.type == eventType then
             table.insert(result, record)
         end
@@ -101,12 +107,13 @@ end
 
 function Module:GetRecentDestiny(count)
     local data = WoWCultivation.Core.DB:GetChar("karmicDestiny")
-    if not data then return {} end
+    if not data or not data.entries then return {} end
     count = count or 10
+    local entries = data.entries
     local result = {}
-    local startIdx = max(1, #data - count + 1)
-    for i = startIdx, #data do
-        table.insert(result, data[i])
+    local startIdx = math.max(1, #entries - count + 1)
+    for i = startIdx, #entries do
+        table.insert(result, entries[i])
     end
     return result
 end

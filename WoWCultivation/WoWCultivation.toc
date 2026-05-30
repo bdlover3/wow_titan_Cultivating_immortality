@@ -1,4 +1,4 @@
-## Interface: 30300
+## Interface: 38001
 ## Title: 魔兽修仙传
 ## Title-zhCN: 魔兽修仙传
 ## Notes: 修仙之路，道阻且长
@@ -47,12 +47,23 @@ Modules\ElixirModule.lua
 Modules\SpiritBeastModule.lua
 Modules\CultivationLogModule.lua
 Modules\DaoTitleModule.lua
+Modules\FavorModule.lua
+Modules\ApiCheckModule.lua
+Modules\ImmortalDestinyModule.lua
 
 # UI
 UI\Toast.lua
 UI\RealmLabel.lua
-UI\CultivationBar.lua
 UI\SisterModel.lua
 UI\MilestonePopup.lua
 UI\DivineSenseFrame.lua
+UI\AlchemyFrame.lua
+UI\CraftingFrame.lua
+UI\AchievementFrame.lua
+UI\TreasureFrame.lua
+UI\MeditationFrame.lua
+UI\DungeonFrame.lua
+UI\SectWarFrame.lua
+UI\OptionsFrame.lua
 UI\MainFrame.lua
+UI\FavorFrame.lua

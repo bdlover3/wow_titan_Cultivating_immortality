@@ -28,7 +28,7 @@
     UnitPowerMax("unit", powerType)         -- 最大能量
     UnitPowerType("unit")                   -- 能量类型编号
     UnitLevel("unit")                       -- 等级
-    UnitClass("unit")                       -- 本地化职业名, 英文职业名
+    UnitClass("unit")                       -- 本地化职业名, 英文职业名, classID
     UnitRace("unit")                        -- 种族
     UnitFactionGroup("unit")                -- 阵营 "Alliance"/"Horde"
     UnitExists("unit")                      -- 单位是否存在
@@ -135,7 +135,7 @@
 ## 6. 地图/坐标
 
     C_Map.GetBestMapForUnit("unit")                  -- 获取单位所在地图 ID
-    C_Map.GetPlayerMapPosition(mapID)                -- 返回 Vector2DMixin（有 :GetXY() 方法）
+    C_Map.GetPlayerMapPosition(mapID, "unit")        -- 返回 Vector2DMixin（有 :GetXY() 方法），3.80.1需要两个参数
     C_Map.GetMapInfo(mapID)                           -- 地图信息表
     C_Map.WorldMapFrame_GetMapID()                    -- 当前世界地图 ID
     C_Map.SetMapByID(mapID)                           -- 设置当前地图上下文
@@ -145,7 +145,7 @@
 
     local uiMapID = C_Map.GetBestMapForUnit("player")
     if uiMapID then
-        local pos = C_Map.GetPlayerMapPosition(uiMapID)
+        local pos = C_Map.GetPlayerMapPosition(uiMapID, "player")
         if pos then
             local x, y = pos:GetXY()
             print(string.format("坐标: %.1f, %.1f", x * 100, y * 100))

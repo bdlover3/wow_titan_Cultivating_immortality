@@ -10,6 +10,12 @@ local DEFAULT_ACCOUNT_DB = {
         realmLabelEnabled = true,
         chatFilterEnabled = true,
         innerDemonEnabled = true,
+        karmaEnabled = true,
+        treasureTooltip = true,
+        elixirTooltip = true,
+        spiritVeinNotify = true,
+        bgNameOverride = true,
+        miniMapIcon = false,
     },
 }
 
@@ -36,8 +42,18 @@ local DEFAULT_CHAR_DB = {
         good = 0,
         evil = 0,
     },
-    karmicDestiny = {},
-    cultivationLog = {},
+    karmicDestiny = { entries = {} },
+    cultivationLog = { entries = {}, lastDate = "", dailyCount = 0 },
+    favor = {
+        value = 0,
+        totalEarned = 0,
+        lastPassiveTime = 0,
+        giftsGiven = {},
+        preferences = {},
+        dialogHistory = {},
+        milestones = {},
+    },
+    immortalDestiny = 0,
     firstLoad = true,
     sisterPosition = { point = "CENTER", x = 300, y = 0 },
 }

@@ -1,3 +1,7 @@
+-- ============================================================
+-- MilestonePopup.lua - 里程碑弹窗
+-- 目标版本: 3.80.1 — BackdropTemplate + AnimationGroup
+-- ============================================================
 local UI = {}
 UI.name = "MilestonePopup"
 WoWCultivation.UI.MilestonePopup = UI
@@ -10,8 +14,8 @@ function UI:OnEnable()
     f:SetSize(340, 180)
     f:SetPoint("CENTER", UIParent, "CENTER", 0, 120)
     f:SetBackdrop({
-        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark",
-        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Gold-Border",
+        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
         tile = true,
         tileSize = 16,
         edgeSize = 20,
@@ -26,8 +30,7 @@ function UI:OnEnable()
     local glow = f:CreateTexture(nil, "BACKGROUND")
     glow:SetPoint("TOPLEFT", f, "TOPLEFT", -20, 20)
     glow:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", 20, -20)
-    glow:SetColorTexture(0.85, 0.65, 0.13, 0.15)
-    f.glow = glow
+    glow:SetTexture(0.85, 0.65, 0.13, 0.15)
 
     local topDeco = f:CreateFontString(nil, "OVERLAY", "GameFontNormalHuge")
     topDeco:SetPoint("TOP", f, "TOP", 0, -12)
@@ -75,47 +78,48 @@ function UI:Show(milestoneName, milestoneDesc)
     f:SetScale(0.3)
     f:Show()
 
-    local scaleAg = f:CreateAnimationGroup()
-    local scaleUp = scaleAg:CreateAnimation("Scale")
-    scaleUp:SetOrigin("CENTER", 0, 0)
-    scaleUp:SetFromScale(0.3)
-    scaleUp:SetToScale(1.1)
-    scaleUp:SetDuration(0.35)
-    scaleUp:SetOrder(1)
+    -- 3.80.1 AnimationGroup：缩放弹入 + 淡入 + 保持 + 淡出
+    local ag = f:CreateAnimationGroup()
 
-    local scaleBounce = scaleAg:CreateAnimation("Scale")
-    scaleBounce:SetOrigin("CENTER", 0, 0)
-    scaleBounce:SetFromScale(1.1)
-    scaleBounce:SetToScale(1.0)
-    scaleBounce:SetDuration(0.15)
-    scaleBounce:SetOrder(2)
+    -- 阶段1：缩放弹入 + 淡入
+    local scaleIn = ag:CreateAnimation("Scale")
+    scaleIn:SetFromScale(0.3, 0.3)
+    scaleIn:SetToScale(1.1, 1.1)
+    scaleIn:SetDuration(0.35)
+    scaleIn:SetOrder(1)
+    scaleIn:SetOrigin("CENTER", 0, 0)
 
-    scaleAg:Play()
-
-    local alphaAg = f:CreateAnimationGroup()
-    local fadeIn = alphaAg:CreateAnimation("Alpha")
+    local fadeIn = ag:CreateAnimation("Alpha")
     fadeIn:SetFromAlpha(0)
     fadeIn:SetToAlpha(1)
-    fadeIn:SetDuration(0.3)
+    fadeIn:SetDuration(0.35)
     fadeIn:SetOrder(1)
 
-    local hold = alphaAg:CreateAnimation("Alpha")
-    hold:SetFromAlpha(1)
-    hold:SetToAlpha(1)
-    hold:SetDuration(self.DISPLAY_DURATION - 0.8)
-    hold:SetOrder(2)
+    -- 阶段2：弹性回弹
+    local bounce = ag:CreateAnimation("Scale")
+    bounce:SetFromScale(1.1, 1.1)
+    bounce:SetToScale(1, 1)
+    bounce:SetDuration(0.15)
+    bounce:SetOrder(2)
+    bounce:SetOrigin("CENTER", 0, 0)
 
-    local fadeOut = alphaAg:CreateAnimation("Alpha")
-    fadeOut:SetFromAlpha(1)
-    fadeOut:SetToAlpha(0)
-    fadeOut:SetDuration(0.5)
-    fadeOut:SetOrder(3)
-
-    alphaAg:SetScript("OnFinished", function()
-        f:Hide()
+    ag:SetScript("OnFinished", function()
+        -- 保持后淡出
+        C_Timer.After(UI.DISPLAY_DURATION - 0.8, function()
+            local fadeOut = f:CreateAnimationGroup()
+            local fo = fadeOut:CreateAnimation("Alpha")
+            fo:SetFromAlpha(1)
+            fo:SetToAlpha(0)
+            fo:SetDuration(0.5)
+            fo:SetOrder(1)
+            fadeOut:SetScript("OnFinished", function()
+                f:Hide()
+            end)
+            fadeOut:Play()
+        end)
     end)
 
-    alphaAg:Play()
+    ag:Play()
 
     if WoWCultivation.UI.SisterModel then
         WoWCultivation.UI.SisterModel:ShowDialog("恭喜道友达成「" .. milestoneName .. "」！")

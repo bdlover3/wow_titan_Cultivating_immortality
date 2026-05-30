@@ -161,7 +161,7 @@ WoW 插件通过事件系统获取游戏状态变化通知。以下列出 3.80.1
 | `UI_SCALE_CHANGED` | UI 缩放变化 | 无 |
 | `DISPLAY_SIZE_CHANGED` | 显示分辨率变化 | 无 |
 | `CVAR_UPDATE` | CVar 变化 | cvarName, value |
-| `LOADING_SCREEN_DISABLED` | 加载画面结束 | 无 |
+| `LOADING_SCREEN_DISABLED` | 加载画面结束 | 无（3.80.1可用性待验证，建议用 `PLAYER_ENTERING_WORLD` 替代） |
 | `MODIFIER_STATE_CHANGED` | 修饰键状态变化 | key, state |
 
 ---

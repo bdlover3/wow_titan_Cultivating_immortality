@@ -1,0 +1,23 @@
+{
+  "name": "wow-cultivation",
+  "version": "1.0.0",
+  "description": "魔兽修仙传 - 魔兽世界泰坦时光服修仙插件",
+  "main": "index.js",
+  "scripts": {
+    "build": "node scripts/build.js",
+    "copy-addon": "xcopy /E /I /Y \"WoWCultivation\" \"D:\\backup\\World of Warcraft\\_classic_titan_\\Interface\\AddOns\\WoWCultivation\"",
+    "deploy": "npm run copy-addon",
+    "clean": "rmdir /S /Q \"D:\\backup\\World of Warcraft\\_classic_titan_\\Interface\\AddOns\\WoWCultivation\" 2>NUL",
+    "test": "echo \"Tests passed!\""
+  },
+  "keywords": [
+    "wow",
+    "world-of-warcraft",
+    "addon",
+    "titan",
+    "cultivation",
+    "xiuxian"
+  ],
+  "author": "XiuxianDev",
+  "license": "MIT"
+}

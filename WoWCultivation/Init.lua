@@ -1,3 +1,9 @@
+-- ============================================================
+-- WoWCultivation Init.lua
+-- 魔兽修仙传 - 插件入口
+-- 目标版本: 泰坦时光服 3.80.1 (Interface: 38001)
+-- ============================================================
+
 WoWCultivation = {}
 WoWCultivation.version = "1.0"
 
@@ -9,56 +15,9 @@ WoWCultivation.Locale = {}
 
 WoWCultivation.debug = false
 
-if not C_Timer then
-    C_Timer = {}
-    function C_Timer.After(duration, callback)
-        local frame = CreateFrame("Frame")
-        local elapsed = 0
-        frame:SetScript("OnUpdate", function(self, dt)
-            elapsed = elapsed + dt
-            if elapsed >= duration then
-                self:SetScript("OnUpdate", nil)
-                callback()
-            end
-        end)
-    end
-    function C_Timer.NewTicker(interval, callback)
-        local frame = CreateFrame("Frame")
-        local elapsed = 0
-        frame:SetScript("OnUpdate", function(self, dt)
-            elapsed = elapsed + dt
-            if elapsed >= interval then
-                elapsed = 0
-                callback()
-            end
-        end)
-        frame.Cancel = function(self)
-            self:SetScript("OnUpdate", nil)
-        end
-        return frame
-    end
-end
-
-if not BackdropTemplateMixin then
-    local origCreateFrame = CreateFrame
-    CreateFrame = function(frameType, name, parent, template, ...)
-        if template == "BackdropTemplate" then
-            template = nil
-        end
-        return origCreateFrame(frameType, name, parent, template, ...)
-    end
-end
-
-do
-    local testTex = UIParent:CreateTexture()
-    if not testTex.SetColorTexture then
-        local mt = getmetatable(testTex).__index
-        function mt.SetColorTexture(self, r, g, b, a)
-            self:SetTexture(r, g, b, a or 1)
-        end
-    end
-end
-
+-- ============================================================
+-- 核心函数
+-- ============================================================
 local ADDON_NAME = "修仙传"
 local COLOR_GREEN = "|cFF00FF00"
 local COLOR_ORANGE = "|cFFFF9900"
@@ -74,21 +33,47 @@ function WoWCultivation:Debug(msg)
     end
 end
 
+-- ============================================================
+-- 插件加载入口
+-- ============================================================
 local function OnEvent(self, event, addonName)
     if addonName ~= "WoWCultivation" then return end
+
     WoWCultivation.Core.DB:Init()
     WoWCultivation:Print("已加载 v" .. WoWCultivation.version)
+
     WoWCultivation.Core.Config:Init()
+
+    -- 启用所有模块
     for _, module in pairs(WoWCultivation.Modules) do
         if module.OnEnable then
-            module:OnEnable()
+            local ok, err = pcall(module.OnEnable, module)
+            if not ok then
+                print("|cFFFF0000[修仙传错误]|r 模块 [" .. (module.name or "未知") .. "] 启用失败: " .. tostring(err))
+            end
         end
     end
+
     for _, ui in pairs(WoWCultivation.UI) do
         if ui.OnEnable then
-            ui:OnEnable()
+            local ok, err = pcall(ui.OnEnable, ui)
+            if not ok then
+                print("|cFFFF0000[修仙传错误]|r UI [" .. (ui.name or "未知") .. "] 启用失败: " .. tostring(err))
+            else
+                WoWCultivation:Debug("UI [" .. (ui.name or "未知") .. "] 启用成功")
+            end
         end
     end
+
+    -- 特别检查小师妹模型
+    if WoWCultivation.UI.SisterModel then
+        if WoWCultivation.UI.SisterModel.frame then
+            WoWCultivation:Print("小师妹模型已加载")
+        else
+            WoWCultivation:Print("警告: 小师妹模型未正确初始化")
+        end
+    end
+
     self:UnregisterEvent("ADDON_LOADED")
 end
 

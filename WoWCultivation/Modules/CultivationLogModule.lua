@@ -49,31 +49,40 @@ function Module:AddLog(logType, detail)
 
     self:CheckDailyReset()
 
+    -- 初始化日志条目数组
+    if not data.entries then
+        data.entries = {}
+    end
+
     local entry = {
         type = logType,
         detail = detail or "",
         time = time(),
         date = date("%Y-%m-%d %H:%M"),
     }
-    table.insert(data, entry)
+    table.insert(data.entries, entry)
     data.dailyCount = (data.dailyCount or 0) + 1
 
-    if #data > 500 then
+    -- 限制日志条目数量
+    if #data.entries > 500 then
         local trimmed = {}
-        for i = (#data - 399), #data do
-            table.insert(trimmed, data[i])
+        for i = (#data.entries - 399), #data.entries do
+            table.insert(trimmed, data.entries[i])
         end
-        WoWCultivationCharDB.cultivationLog = trimmed
-        WoWCultivationCharDB.cultivationLog.lastDate = data.lastDate
-        WoWCultivationCharDB.cultivationLog.dailyCount = data.dailyCount
+        data.entries = trimmed
     end
 
     local typeName = self.LOG_TYPES[logType] or logType
     WoWCultivation:Print("【" .. typeName .. "】" .. (detail or ""))
+
+    -- 触发修仙录闪显事件
+    local EM = WoWCultivation.Core.EventManager
+    EM:Trigger("CULTIVATION_LOG", logType, detail)
 end
 
 function Module:OnLevelUp(level)
-    self:AddLog("CULTIVATION", "修为精进，突破至" .. (WoWCultivation.Data.Realm[level] and WoWCultivation.Data.Realm[level].name or "新境界"))
+    local realmName = WoWCultivation.Data.Realm[level] and WoWCultivation.Data.Realm[level].name or "新境界"
+    self:AddLog("CULTIVATION", "修为精进，突破至" .. realmName)
 end
 
 function Module:OnLoot(msg)
@@ -97,9 +106,9 @@ end
 
 function Module:GetLogsByType(logType)
     local data = WoWCultivation.Core.DB:GetChar("cultivationLog")
-    if not data then return {} end
+    if not data or not data.entries then return {} end
     local result = {}
-    for _, entry in ipairs(data) do
+    for _, entry in ipairs(data.entries) do
         if entry.type == logType then
             table.insert(result, entry)
         end
@@ -109,12 +118,13 @@ end
 
 function Module:GetRecentLogs(count)
     local data = WoWCultivation.Core.DB:GetChar("cultivationLog")
-    if not data then return {} end
+    if not data or not data.entries then return {} end
     count = count or 20
+    local entries = data.entries
     local result = {}
-    local startIdx = max(1, #data - count + 1)
-    for i = startIdx, #data do
-        table.insert(result, data[i])
+    local startIdx = math.max(1, #entries - count + 1)
+    for i = startIdx, #entries do
+        table.insert(result, entries[i])
     end
     return result
 end
@@ -126,12 +136,12 @@ end
 
 function Module:GetLogSummary()
     local data = WoWCultivation.Core.DB:GetChar("cultivationLog")
-    if not data then return "修炼日志: 暂无记录" end
+    if not data or not data.entries then return "修炼日志: 暂无记录" end
     local counts = {}
     for k, v in pairs(self.LOG_TYPES) do
         counts[k] = 0
     end
-    for _, entry in ipairs(data) do
+    for _, entry in ipairs(data.entries) do
         if counts[entry.type] then
             counts[entry.type] = counts[entry.type] + 1
         end

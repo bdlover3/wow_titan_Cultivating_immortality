@@ -60,15 +60,19 @@ end
 
 function Module:HookTooltip()
     GameTooltip:HookScript("OnTooltipSetItem", function(tooltip)
-        if not self.enabled then return end
+        if not Module.enabled then return end
         local name, link = tooltip:GetItem()
         if not link then return end
-        local _, _, _, _, _, _, _, _, equipLoc = GetItemInfo(link)
-        local quality = select(3, GetItemInfo(link))
+
+        -- WotLK GetItemInfo 返回: name, link, quality, iLevel, reqLevel, type, subType, maxStack, equipSlot, texture, vendorPrice
+        local _, _, quality, _, _, _, _, _, equipLoc = GetItemInfo(link)
+
         if quality then
-            local rankName = self:QualityToRank(quality)
+            local rankName = Module:QualityToRank(quality)
             local _, _, _, colorHex = GetItemQualityColor(quality)
-            tooltip:AddLine("灵宝等级: |c" .. colorHex .. rankName .. "|r")
+            if colorHex then
+                tooltip:AddLine("灵宝等级: |c" .. colorHex .. rankName .. "|r")
+            end
         end
     end)
 end

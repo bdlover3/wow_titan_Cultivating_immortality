@@ -12,16 +12,29 @@ function Module:OnDisable()
 end
 
 function Module:HookContextMenu()
-    hooksecurefunc("UnitPopup_ShowMenu", function(dropdownMenu, which, unit, name, userData)
-        if unit and UnitIsPlayer(unit) and UnitIsFriend("player", unit) then
-            local info = UIDropDownMenu_CreateInfo()
-            info.text = "神识探查"
-            info.func = function()
-                self:Inspect(unit)
+    -- 3.80.1: UnitPopup_ShowMenu 存在，使用 hooksecurefunc 注入菜单项
+    if UnitPopup_ShowMenu then
+        hooksecurefunc("UnitPopup_ShowMenu", function(dropdownMenu, which, unit, name, userData)
+            if unit and UnitIsPlayer(unit) and UnitIsFriend("player", unit) then
+                local info = UIDropDownMenu_CreateInfo()
+                info.text = "神识探查"
+                info.func = function()
+                    Module:Inspect(unit)
+                end
+                info.notCheckable = true
+                UIDropDownMenu_AddButton(info)
             end
-            UIDropDownMenu_AddButton(info)
+        end)
+    else
+        -- 3.80.1 备选：Hook UnitPopupMenus 表
+        if UnitPopupMenus then
+            for menuName, menuTable in pairs(UnitPopupMenus) do
+                if type(menuTable) == "table" then
+                    table.insert(menuTable, "神识探查")
+                end
+            end
         end
-    end)
+    end
 end
 
 function Module:Inspect(unit)

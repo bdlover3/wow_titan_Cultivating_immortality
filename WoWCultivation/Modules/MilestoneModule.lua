@@ -47,6 +47,10 @@ function Module:Trigger(milestoneId)
         WoWCultivation.UI.Toast:Show("【" .. data.name .. "】" .. data.desc, 5)
     end
 
+    if WoWCultivation.UI.MilestonePopup then
+        WoWCultivation.UI.MilestonePopup:Show(data.name, data.desc)
+    end
+
     if WoWCultivation.Modules.SisterModule then
         WoWCultivation.Modules.SisterModule:ShowDialog(data.dialogSequence)
     end
@@ -75,24 +79,38 @@ end
 
 function Module:FlashButton(buttonName)
     local button = _G[buttonName]
-    if button then
-        local flash = button:CreateAnimationGroup()
-        local alpha1 = flash:CreateAnimation("Alpha")
-        alpha1:SetFromAlpha(0.2)
-        alpha1:SetToAlpha(1.0)
-        alpha1:SetDuration(0.5)
-        alpha1:SetOrder(1)
-        local alpha2 = flash:CreateAnimation("Alpha")
-        alpha2:SetFromAlpha(1.0)
-        alpha2:SetToAlpha(0.2)
-        alpha2:SetDuration(0.5)
-        alpha2:SetOrder(2)
-        flash:SetLooping("REPEAT")
-        flash:Play()
-        C_Timer.After(10, function()
-            flash:Stop()
-        end)
+    if not button then return end
+
+    -- 3.80.1: 使用 AnimationGroup 实现闪烁
+    local ag = button:CreateAnimationGroup()
+    ag:SetLooping("REPEAT")
+
+    local flashCount = 20  -- 10秒内闪烁20次
+    for i = 1, flashCount do
+        local fadeOut = ag:CreateAnimation("Alpha")
+        fadeOut:SetFromAlpha(1)
+        fadeOut:SetToAlpha(0.2)
+        fadeOut:SetDuration(0.25)
+        fadeOut:SetOrder((i - 1) * 2 + 1)
+
+        local fadeIn = ag:CreateAnimation("Alpha")
+        fadeIn:SetFromAlpha(0.2)
+        fadeIn:SetToAlpha(1)
+        fadeIn:SetDuration(0.25)
+        fadeIn:SetOrder((i - 1) * 2 + 2)
     end
+
+    ag:Play()
+
+    -- 10秒后停止闪烁并恢复
+    C_Timer.After(10, function()
+        if ag and not ag:IsDone() then
+            ag:Stop()
+        end
+        if button then
+            button:SetAlpha(1)
+        end
+    end)
 end
 
 function Module:ResetAll()

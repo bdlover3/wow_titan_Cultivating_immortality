@@ -122,29 +122,32 @@ btn:SetAttribute("shift-unit1", "player")
 
 ```lua
 -- 注册配置面板
-do
-    local category = Settings.RegisterVerticalLayoutCategory("MyAddon")
+EventUtil.ContinueOnAddOnLoaded("MyAddon", function()
+    local category, layout = Settings.RegisterVerticalLayoutCategory("MyAddon")
 
-    -- 创建设置组
-    local group = Settings.CreateVerticalLayoutCategory("通用设置")
+    -- Proxy Setting：自行管理 SavedVariables
+    if MyAddonSettings == nil then MyAddonSettings = {} end
+    if MyAddonSettings.enabled == nil then MyAddonSettings.enabled = true end
 
-    -- 布尔开关
-    Settings.AddToCategory(group, Settings.NewCheckbox(
-        "启用功能", -- 选项名
-        Settings.Varable.New("MyAddon_Enabled", false), -- 变量
-        function() end -- onChange 回调
-    ))
+    local enabledSetting = Settings.RegisterProxySetting(
+        category, "MY_ADDON_ENABLED", Settings.VarType.Boolean,
+        "启用功能", true,
+        function() return MyAddonSettings.enabled end,
+        function(v) MyAddonSettings.enabled = v end
+    )
+    Settings.CreateCheckbox(category, enabledSetting)
 
-    -- 滑块
-    Settings.AddToCategory(group, Settings.NewSlider(
-        "透明度", 0, 1, 0.01,
-        Settings.Varable.New("MyAddon_Alpha", 1.0),
-        function() end
-    ))
+    -- AddOn Setting：自动管理 SavedVariables
+    local alphaSetting = Settings.RegisterAddOnSetting(
+        category, "MY_ADDON_ALPHA", "alpha",
+        MyAddonSettings, Settings.VarType.Number,
+        "透明度", 1.0
+    )
+    local options = Settings.CreateSliderOptions(0, 1, 0.01)
+    Settings.CreateSlider(category, alphaSetting, options, "透明度设置")
 
     Settings.RegisterAddOnCategory(category)
-    Settings.OpenToCategory(category)
-end
+end)
 ```
 
 ### 事件注册

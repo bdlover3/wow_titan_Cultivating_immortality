@@ -5,7 +5,8 @@ Module.enabled = false
 function Module:OnEnable()
     self.enabled = true
     local EM = WoWCultivation.Core.EventManager
-    EM:Register("ZONE_CHANGED_NEW_AREA", function()
+    -- 3.80.1: 使用 ZONE_CHANGED 替代 ZONE_CHANGED_NEW_AREA
+    EM:Register("ZONE_CHANGED", function()
         self:OnZoneChanged()
     end)
     EM:Register("PLAYER_PVP_KILLS_CHANGED", function()
@@ -62,6 +63,7 @@ function Module:GetPvPRankName(rank)
 end
 
 function Module:IsInBattleground()
+    -- WotLK: IsInInstance() 返回 inInstance, instanceType
     local inInstance, instanceType = IsInInstance()
     return inInstance and instanceType == "pvp"
 end

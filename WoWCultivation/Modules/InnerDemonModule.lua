@@ -70,7 +70,7 @@ function Module:GetValue()
 end
 
 function Module:SetValue(val)
-    val = max(0, min(100, val))
+    val = math.max(0, math.min(100, val))
     local data = WoWCultivationCharDB.innerDemon
     if data then
         local oldState = self:GetStateName()
@@ -124,7 +124,7 @@ function Module:OnUnitAura(unit)
         local ccType = self.CC_MAP[spellId]
         if ccType then
             local ccInfo = self.CC_TYPE_MAP[ccType]
-            if ccInfo and not self.lastCCSpell or self.lastCCSpell ~= spellId then
+            if ccInfo and (not self.lastCCSpell or self.lastCCSpell ~= spellId) then
                 self.lastCCSpell = spellId
                 self:AddValue(ccInfo.add)
                 WoWCultivation:Print(ccInfo.desc .. " 心魔值+" .. ccInfo.add)
@@ -174,7 +174,7 @@ function Module:StartDecayTimer()
 end
 
 function Module:Meditate(duration)
-    local decay = floor(duration / 5)
+    local decay = math.floor(duration / 5)
     if decay > 0 then
         self:AddValue(-decay)
         WoWCultivation:Print("静心调息" .. duration .. "秒，心魔值-" .. decay)

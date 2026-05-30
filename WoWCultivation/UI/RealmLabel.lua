@@ -13,7 +13,7 @@ UI.REALM_ORDER = { "练气", "筑基", "结丹", "元婴" }
 
 function UI:OnEnable()
     hooksecurefunc("CompactUnitFrame_UpdateName", function(frame)
-        self:UpdateNamePlate(frame)
+        UI:UpdateNamePlate(frame)
     end)
 end
 
@@ -31,7 +31,7 @@ end
 function UI:GetRealmColor(realmName)
     if not realmName then return "|cFFFFFFFF" end
     for pattern, color in pairs(self.REALM_COLORS) do
-        if strfind(realmName, pattern) then
+        if string.find(realmName, pattern) then
             return color
         end
     end
@@ -54,7 +54,7 @@ function UI:UpdateNamePlate(frame)
     local originalName = frame.name:GetText()
     if not originalName then return end
 
-    if strfind(originalName, "%[") then return end
+    if string.find(originalName, "%[") then return end
 
     frame.name:SetText(color .. "[" .. realmName .. "]|r " .. originalName)
 end

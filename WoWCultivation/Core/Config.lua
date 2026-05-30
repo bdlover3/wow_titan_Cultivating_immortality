@@ -44,6 +44,12 @@ function Config:HandleSlashCommand(msg)
         if WoWCultivation.UI.SisterModel then
             WoWCultivation.UI.SisterModel:Toggle()
         end
+    elseif msg == "destiny" or msg == "xianyuan" then
+        local val = 0
+        if WoWCultivation.Modules and WoWCultivation.Modules.ImmortalDestinyModule then
+            val = WoWCultivation.Modules.ImmortalDestinyModule:GetValue()
+        end
+        WoWCultivation:Print("当前仙缘值: |cFF44AAFF" .. BreakUpLargeNumbers(val) .. "|r")
     elseif msg == "help" then
         self:ShowHelp()
     else
@@ -56,6 +62,7 @@ function Config:ShowHelp()
     WoWCultivation:Print("/xxz realm - 查看当前境界")
     WoWCultivation:Print("/xxz sect - 查看当前宗门")
     WoWCultivation:Print("/xxz money - 查看灵石")
+    WoWCultivation:Print("/xxz destiny - 查看仙缘值")
     WoWCultivation:Print("/xxz milestone - 检查里程碑")
     WoWCultivation:Print("/xxz sister - 切换小师妹")
     WoWCultivation:Print("/xxz debug - 切换调试模式")

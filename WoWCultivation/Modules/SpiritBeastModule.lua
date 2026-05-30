@@ -59,6 +59,7 @@ Module.PET_TYPE_NAMES = {
 function Module:OnEnable()
     self.enabled = true
     local EM = WoWCultivation.Core.EventManager
+    -- WotLK: 用 COMPANION_LEARNED/COMPANION_UNLEARNED 检测小宠物
     EM:Register("COMPANION_LEARNED", function()
         self:OnCompanionLearned()
     end)
@@ -74,25 +75,23 @@ function Module:OnDisable()
     self.enabled = false
 end
 
-function Module:GetMountSpiritName(mountId)
-    local _, _, _, _, _, _, _, _, _, _, isFlying = C_MountJournal.GetMountInfoByID(mountId)
-    local mountType = isFlying and "flying" or "ground"
-    local typeName = self.MOUNT_TYPE[mountType] or "灵兽坐骑"
-    local name = C_MountJournal.GetMountInfoByID(mountId)
-    return name and (typeName .. "·" .. name) or typeName
-end
-
 function Module:GetPetSpiritName(petType)
     return self.PET_TYPE_NAMES[petType] or "灵兽伙伴"
 end
 
 function Module:GetHunterPetName()
-    local petName, _, _, _, _, _, petType = GetPetInfo()
-    if not petName then
-        if UnitExists("pet") then
-            petName = UnitName("pet")
-        end
+    -- WotLK: GetPetInfo() 可能不可用，使用 UnitName("pet") 作为备选
+    local petName = nil
+    local petType = nil
+
+    if GetPetInfo then
+        petName, _, _, _, _, _, petType = GetPetInfo()
     end
+
+    if not petName and UnitExists("pet") then
+        petName = UnitName("pet")
+    end
+
     local typeSuffix = petType and self.PET_TYPE_NAMES[petType] or "本命灵兽"
     return petName and (typeSuffix .. "·" .. petName) or "本命灵兽"
 end
@@ -121,21 +120,29 @@ function Module:OnUnitPet(unit)
     end
 end
 
-function Module:GetMountList()
-    local mounts = {}
-    local count = C_MountJournal.GetNumMounts()
-    for i = 1, count do
-        local name, spellId, _, _, mountId = C_MountJournal.GetMountInfoByID(i)
-        if name and mountId then
-            local spiritName = self:GetMountSpiritName(mountId)
-            table.insert(mounts, {
-                name = name,
-                spiritName = spiritName,
-                mountId = mountId,
-            })
-        end
+-- 3.80.1: 坐骑数量通过 C_MountJournal 或 GetNumCompanions 获取
+function Module:GetMountCount()
+    local count = 0
+    if C_MountJournal then
+        count = C_MountJournal.GetNumMounts() or 0
+    elseif GetNumCompanions then
+        count = GetNumCompanions("MOUNT") or 0
     end
-    return mounts
+    return count
+end
+
+function Module:GetMountSpiritName(index)
+    if C_MountJournal then
+        local mountIDs = C_MountJournal.GetMountIDs()
+        if mountIDs and mountIDs[index] then
+            local _, name = C_MountJournal.GetMountInfoByID(mountIDs[index])
+            return name and ("灵兽坐骑·" .. name) or "灵兽坐骑"
+        end
+    elseif GetCompanionInfo then
+        local _, mountName = GetCompanionInfo("MOUNT", index)
+        return mountName and ("灵兽坐骑·" .. mountName) or "灵兽坐骑"
+    end
+    return "灵兽坐骑"
 end
 
 function Module:GetSpiritBeastText()
@@ -143,7 +150,7 @@ function Module:GetSpiritBeastText()
     if englishClass == "HUNTER" and UnitExists("pet") then
         return "本命灵兽: " .. (UnitName("pet") or "未知")
     end
-    local mountCount = C_MountJournal.GetNumMounts() or 0
+    local mountCount = self:GetMountCount()
     return "灵兽坐骑: " .. mountCount .. "头"
 end
 

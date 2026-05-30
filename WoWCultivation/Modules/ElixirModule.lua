@@ -81,7 +81,9 @@ function Module:GetElixirName(itemId)
         end
     end
 
-    local itemName, _, itemRarity, _, _, _, _, _, _, _, sellPrice = GetItemInfo(itemId)
+    -- 3.80.1: GetItemInfo 接受 item link，需通过 item ID 构造 link
+    local itemLink = "item:" .. itemId .. ":0:0:0:0:0:0:0"
+    local itemName = GetItemInfo(itemLink)
     if not itemName then return nil end
 
     local isPotion = itemName:find("治疗药水") or itemName:find("Health Potion")
