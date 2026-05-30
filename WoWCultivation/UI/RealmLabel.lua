@@ -45,16 +45,33 @@ function UI:UpdateNamePlate(frame)
     local unit = frame.unit
     if not unit then return end
 
-    if not UnitIsPlayer(unit) then return end
+    -- 玩家和NPC都显示境界前缀
+    if UnitIsPlayer(unit) then
+        local realmName = self:GetRealmForPlayer(unit)
+        if not realmName then return end
 
-    local realmName = self:GetRealmForPlayer(unit)
-    if not realmName then return end
+        local color = self:GetRealmColor(realmName)
+        local originalName = frame.name:GetText()
+        if not originalName then return end
 
-    local color = self:GetRealmColor(realmName)
-    local originalName = frame.name:GetText()
-    if not originalName then return end
+        if string.find(originalName, "%[") then return end
 
-    if string.find(originalName, "%[") then return end
+        frame.name:SetText(color .. "[" .. realmName .. "]|r " .. originalName)
+    elseif not UnitIsPlayer(unit) then
+        -- 怪物/NPC根据等级显示境界前缀
+        local level = UnitLevel(unit)
+        if not level or level <= 0 then return end
 
-    frame.name:SetText(color .. "[" .. realmName .. "]|r " .. originalName)
+        local realmName = self:GetRealmForPlayer(unit)
+        if not realmName then return end
+
+        local color = self:GetRealmColor(realmName)
+        local originalName = frame.name:GetText()
+        if not originalName then return end
+
+        if string.find(originalName, "%[") then return end
+
+        -- 怪物用不同标记与玩家区分
+        frame.name:SetText(color .. "[" .. realmName .. "·妖]|r " .. originalName)
+    end
 end

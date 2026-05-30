@@ -12,27 +12,81 @@ function Module:OnDisable()
 end
 
 function Module:HookContextMenu()
-    -- 3.80.1: UnitPopup_ShowMenu 存在，使用 hooksecurefunc 注入菜单项
-    if UnitPopup_ShowMenu then
-        hooksecurefunc("UnitPopup_ShowMenu", function(dropdownMenu, which, unit, name, userData)
-            if unit and UnitIsPlayer(unit) and UnitIsFriend("player", unit) then
-                local info = UIDropDownMenu_CreateInfo()
-                info.text = "神识探查"
-                info.func = function()
+    -- ============================================================
+    -- WotLK 3.80.1 右键菜单机制：
+    --   UnitPopup_OpenMenu(which, contextData)
+    --     → UnitPopupManager:OpenMenu(which, contextData)
+    --       → MenuUtil.CreateContextMenu(parent, generatorFunc)
+    --         generatorFunc 中 rootDescription:SetTag("MENU_UNIT_"..which)
+    --         然后 rootDescription:CreateButton() 添加各项
+    --
+    -- 正确的注入方式：Menu.ModifyMenu(tag, callback)
+    --   tag 匹配菜单标签（"MENU_UNIT_PARTY" 等）
+    --   callback(ownerRegion, description, contextData) 中
+    --     description:CreateButton(text, onClick) 追加按钮
+    -- ============================================================
+
+    if not Menu or not Menu.ModifyMenu then
+        -- Menu API 不存在时的 fallback
+        self:HookContextMenuFallback()
+        return
+    end
+
+    -- 需要注入的菜单类型（对应 UnitPopup_OpenMenu 的 which 参数）
+    local menuTags = {
+        "MENU_UNIT_SELF",
+        "MENU_UNIT_PARTY",
+        "MENU_UNIT_PLAYER",
+        "MENU_UNIT_RAID_PLAYER",
+        "MENU_UNIT_ENEMY_PLAYER",
+        "MENU_UNIT_TARGET",
+    }
+
+    for _, tag in ipairs(menuTags) do
+        Menu.ModifyMenu(tag, function(ownerRegion, description, contextData)
+            if not Module.enabled then return end
+            if not contextData or not contextData.unit then return end
+            if not UnitIsPlayer(contextData.unit) then return end
+
+            local unit = contextData.unit
+            description:CreateButton(
+                "|cFFAA44FF神识探查|r",
+                function()
                     Module:Inspect(unit)
                 end
-                info.notCheckable = true
-                UIDropDownMenu_AddButton(info)
-            end
+            )
         end)
-    else
-        -- 3.80.1 备选：Hook UnitPopupMenus 表
-        if UnitPopupMenus then
-            for menuName, menuTable in pairs(UnitPopupMenus) do
-                if type(menuTable) == "table" then
-                    table.insert(menuTable, "神识探查")
-                end
+    end
+end
+
+function Module:HookContextMenuFallback()
+    -- 旧版兼容：hook UnitPopup_OpenMenu + 延迟注入 UIDropDownMenu 按钮
+    if not UnitPopup_OpenMenu then return end
+
+    hooksecurefunc("UnitPopup_OpenMenu", function(which, contextData)
+        if not Module.enabled then return end
+        local unit = contextData and contextData.unit
+        if not unit or not UnitIsPlayer(unit) then return end
+
+        -- 延迟一帧，等待原生菜单渲染完成
+        C_Timer.After(0, function()
+            Module:TryInjectDropDownMenu(unit)
+        end)
+    end)
+end
+
+function Module:TryInjectDropDownMenu(unit)
+    for i = 1, 2 do
+        local dropDown = _G["DropDownList" .. i]
+        if dropDown and dropDown:IsVisible() then
+            local info = UIDropDownMenu_CreateInfo()
+            info.text = "|cFFAA44FF神识探查|r"
+            info.func = function()
+                Module:Inspect(unit)
             end
+            info.notCheckable = true
+            UIDropDownMenu_AddButton(info, i)
+            return
         end
     end
 end

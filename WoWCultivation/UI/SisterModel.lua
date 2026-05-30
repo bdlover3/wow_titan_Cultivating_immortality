@@ -63,6 +63,7 @@ UI.ANIM = {
 
 UI.TALK_ANIMS = { 1, 60, 43, 28 }
 UI.IDLE_ANIMS = { 0, 10, 22, 43, 37, 58 }
+UI.isPortraitMode = false  -- 头像模式/全身模式切换
 
 UI.RADIAL_MENU = {
     { label = "对话", icon = "Interface\\Icons\\INV_Misc_Book_07", action = "talk" },
@@ -148,7 +149,7 @@ local function TrySetAnimation(mf, animId, variation)
 end
 
 function UI:OnEnable()
-    self.modelFacing = 0
+    self.modelFacing = 0  -- 默认朝向（全身模式），头像模式实验左朝向
     self.modelCamScale = 1.0
 
     SafeCall(function()
@@ -158,35 +159,40 @@ function UI:OnEnable()
         f:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -50, 180)
         f:SetClampedToScreen(true)
         f:SetMovable(true)
-        f:EnableMouse(true)
-        f:RegisterForDrag("LeftButton")
-        f:SetScript("OnDragStart", function(self)
-            self.dragStartX, self.dragStartY = GetCursorPosition()
-            self:StartMoving()
-        end)
-        f:SetScript("OnDragStop", function(self)
-            self:StopMovingOrSizing()
-            local endX, endY = GetCursorPosition()
-            local startX = self.dragStartX or endX
-            local startY = self.dragStartY or endY
-            local dist = math.sqrt((endX - startX)^2 + (endY - startY)^2)
-            if dist < 10 then
-                UI:OnLeftClick()
-            end
-            UI:SavePosition()
-        end)
-        f:SetScript("OnMouseDown", function(self, button)
-            if button == "RightButton" then
-                UI:OnRightClick()
-            end
-        end)
 
+        -- 标题名称
         local nameText = f:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
         nameText:SetPoint("TOP", f, "TOP", 0, -5)
         nameText:SetText("|cFFFFD700小师妹|r")
         nameText:SetShadowColor(0, 0, 0, 0.8)
         nameText:SetShadowOffset(1, -1)
         f.nameText = nameText
+
+        -- 拖拽手柄：标题栏区域
+        self.dragHandle = CreateFrame("Frame", nil, f)
+        local dh = self.dragHandle
+        dh:SetSize(UI.MODEL_WIDTH + 20, 24)
+        dh:SetPoint("TOP", f, "TOP", 0, 0)
+        dh:EnableMouse(true)
+        dh:RegisterForDrag("LeftButton")
+        dh:SetScript("OnDragStart", function(self)
+            f:StartMoving()
+        end)
+        dh:SetScript("OnDragStop", function(self)
+            f:StopMovingOrSizing()
+            UI:SavePosition()
+        end)
+        -- 拖拽手柄视觉提示
+        local dhBg = dh:CreateTexture(nil, "BACKGROUND")
+        dhBg:SetAllPoints(dh)
+        dhBg:SetTexture("Interface\\Buttons\\WHITE8x8")
+        dhBg:SetVertexColor(0.85, 0.65, 0.13, 0.15)
+        dh:SetScript("OnEnter", function(self)
+            dhBg:SetVertexColor(0.85, 0.65, 0.13, 0.35)
+        end)
+        dh:SetScript("OnLeave", function(self)
+            dhBg:SetVertexColor(0.85, 0.65, 0.13, 0.15)
+        end)
     end, "创建主框架")
 
     SafeCall(function()
@@ -208,8 +214,25 @@ function UI:OnEnable()
         end)
     end, "创建模型框架")
 
-    SafeCall(function() self:CreateControlButtons() end, "创建控制按钮")
+    SafeCall(function()
+        -- 点击交互层：用 Frame + EnableMouse + OnMouseDown，不创建任何纹理避免遮挡模型
+        self.clickButton = CreateFrame("Frame", nil, self.frame)
+        local cb = self.clickButton
+        cb:SetSize(UI.MODEL_WIDTH, UI.MODEL_HEIGHT)
+        cb:SetPoint("CENTER", self.frame, "CENTER", 0, -10)
+        cb:SetFrameLevel(100)
+        cb:EnableMouse(true)
+        cb:SetScript("OnMouseDown", function(self, button)
+            if button == "LeftButton" then
+                UI:OnLeftClick()
+            elseif button == "RightButton" then
+                UI:OnRightClick()
+            end
+        end)
+    end, "创建点击交互层")
+
     SafeCall(function() self:CreateRadialMenu() end, "创建扇形菜单")
+    SafeCall(function() self:CreateControlButtons() end, "创建控制按钮")
     SafeCall(function() self:LoadModel() end, "加载模型")
 
     SafeCall(function()
@@ -313,23 +336,30 @@ function UI:OnEnable()
 end
 
 function UI:CreateControlButtons()
+    local rm = self.radialMenu
+    if not rm then return end
+
     local btnSize = 24
     local btnSpacing = 6
-    local totalWidth = btnSize * 4 + btnSpacing * 3
+    local numBtns = 6
+    local totalWidth = btnSize * numBtns + btnSpacing * (numBtns - 1)
 
     local buttons = {
         { icon = "Interface\\Buttons\\UI-SpellbookIcon-PrevPage-Up", tip = "向左转", action = function() UI:RotateModel(-0.3) end },
         { icon = "Interface\\Buttons\\UI-SpellbookIcon-NextPage-Up", tip = "向右转", action = function() UI:RotateModel(0.3) end },
         { icon = "Interface\\Buttons\\UI-PlusButton-Up", tip = "放大", action = function() UI:ZoomModel(-0.2) end },
         { icon = "Interface\\Buttons\\UI-MinusButton-Up", tip = "缩小", action = function() UI:ZoomModel(0.2) end },
+        { icon = "Interface\\Icons\\Spell_Holy_MindVision", tip = "头像/全身切换", action = function() UI:TogglePortraitMode() end },
+        { icon = "Interface\\Icons\\INV_Misc_QuestScroll_01", tip = "重载界面", action = function() ReloadUI() end },
     }
 
     self.controlButtons = {}
     for i, btnData in ipairs(buttons) do
-        local btn = CreateFrame("Button", nil, self.frame)
+        local btn = CreateFrame("Button", nil, rm)
         btn:SetSize(btnSize, btnSize)
         local x = -totalWidth / 2 + (i - 1) * (btnSize + btnSpacing) + btnSize / 2
-        btn:SetPoint("BOTTOM", self.frame, "BOTTOM", x, 4)
+        -- 放在扇形菜单底部，拱门下方
+        btn:SetPoint("BOTTOM", rm, "BOTTOM", x, 16)
 
         btn:SetNormalTexture(btnData.icon)
         btn:SetPushedTexture(btnData.icon)
@@ -369,19 +399,63 @@ function UI:ZoomModel(delta)
     pcall(function() mf:SetCamDistanceScale(self.modelCamScale) end)
 end
 
+function UI:TogglePortraitMode()
+    self.isPortraitMode = not self.isPortraitMode
+    local mf = self.modelFrame
+    if not mf then return end
+
+    if self.isPortraitMode then
+        -- 头像模式：左朝向，重置缩放，聚焦面部
+        self.modelCamScale = 1.0
+        self.modelFacing = -0.67  -- 左朝向（-π/2 + 0.9）
+        pcall(function()
+            mf:SetModelScale(1.0)
+            mf:SetPosition(0, 0, 0)
+            mf:SetPortraitZoom(1)
+            mf:SetCamDistanceScale(1.0)
+            mf:SetFacing(-0.67)
+        end)
+        if WoWCultivation.UI.Toast then
+            WoWCultivation.UI.Toast:Show("切换至头像模式", 1.5)
+        end
+    else
+        -- 全身模式：重置所有缩放和朝向到默认值
+        self.modelCamScale = 1.0
+        self.modelFacing = 0
+        pcall(function()
+            mf:SetModelScale(1.0)
+            mf:SetPosition(0, 0, 0)
+            mf:SetPortraitZoom(0)
+            mf:SetCamDistanceScale(1.0)
+            mf:SetFacing(0)
+        end)
+        if WoWCultivation.UI.Toast then
+            WoWCultivation.UI.Toast:Show("切换至全身模式", 1.5)
+        end
+    end
+end
+
 function UI:CreateRadialMenu()
     self.radialMenu = CreateFrame("Frame", "WoWCultivationRadialMenu", UIParent)
     local rm = self.radialMenu
-    rm:SetSize(280, 280)
-    rm:SetFrameStrata("DIALOG")
+    rm:SetSize(360, 360)
+    rm:SetFrameStrata("FULLSCREEN_DIALOG")
     rm:EnableMouse(true)
     rm:Hide()
 
+    -- 右键点击扇形菜单空白区域关闭
+    rm:SetScript("OnMouseDown", function(self, button)
+        if button == "RightButton" then
+            UI:HideRadialMenu()
+        end
+    end)
+
     self.radialButtons = {}
     local numItems = #UI.RADIAL_MENU
-    local radius = 90
-    local startAngle = math.pi
-    local endAngle = 0
+    local radius = 130
+    -- 大拱门：从左下方经过头顶到右下方，环绕小师妹
+    local startAngle = 7 * math.pi / 6   -- 左下方 210°
+    local endAngle = -math.pi / 6         -- 右下方 330° (即 -30°)
     local angleStep = (startAngle - endAngle) / (numItems - 1)
 
     for i, item in ipairs(UI.RADIAL_MENU) do
@@ -417,6 +491,12 @@ function UI:CreateRadialMenu()
             UI:ExecuteRadialAction(item.action)
             UI:HideRadialMenu()
         end)
+        -- 按钮上右键也关闭菜单
+        btn:SetScript("OnMouseDown", function(self, button)
+            if button == "RightButton" then
+                UI:HideRadialMenu()
+            end
+        end)
         btn:SetScript("OnEnter", function(self)
             self:SetBackdropBorderColor(1, 0.85, 0.3, 1)
             GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
@@ -442,13 +522,15 @@ function UI:ShowRadialMenu()
     local rm = self.radialMenu
     if not rm then return end
 
-    local scale = UIParent:GetEffectiveScale()
-    local x, y = GetCursorPosition()
-    x = x / scale
-    y = y / scale
+    -- 如果已显示则切换关闭
+    if rm:IsShown() then
+        rm:Hide()
+        return
+    end
 
     rm:ClearAllPoints()
-    rm:SetPoint("CENTER", UIParent, "BOTTOMLEFT", x, y + 60)
+    -- 拱门环绕小师妹：菜单中心对齐模型中心
+    rm:SetPoint("CENTER", self.frame, "CENTER", 0, -10)
     rm:Show()
 end
 

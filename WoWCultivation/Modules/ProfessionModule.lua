@@ -25,31 +25,18 @@ end
 
 function Module:GetPlayerProfessions()
     local profs = {}
-    if GetProfessions then
-        local prof1, prof2, archaeology, fishing, cooking, firstAid = GetProfessions()
-        local indices = { prof1, prof2, archaeology, fishing, cooking, firstAid }
-        for _, idx in ipairs(indices) do
-            if idx then
-                local name, _, _, _, _, _, skillLine = GetProfessionInfo(idx)
-                local xiuxianName = self:GetProfessionName(name)
-                table.insert(profs, {
-                    wowName = name,
-                    xiuxianName = xiuxianName,
-                    skillLine = skillLine,
-                })
-            end
-        end
-    else
-        for i = 1, GetNumSkillLines() do
-            local skillName, isHeader, _, _, _, _, _, _, _, _, _, _, _ = GetSkillLineInfo(i)
-            if not isHeader and skillName and self.SKILL_LINE_NAMES[skillName] then
-                local xiuxianName = self:GetProfessionName(skillName)
-                table.insert(profs, {
-                    wowName = skillName,
-                    xiuxianName = xiuxianName,
-                    skillLine = nil,
-                })
-            end
+    -- 3.80.1 不支持 GetProfessions/GetProfessionInfo，统一用 GetSkillLineInfo
+    for i = 1, GetNumSkillLines() do
+        local skillName, isHeader, _, rank, _, _, maxRank, _, _, _, _, skillLine = GetSkillLineInfo(i)
+        if not isHeader and skillName and self.SKILL_LINE_NAMES[skillName] then
+            local xiuxianName = self:GetProfessionName(skillName)
+            table.insert(profs, {
+                wowName = skillName,
+                xiuxianName = xiuxianName,
+                skillLine = skillLine,
+                rank = rank,
+                maxRank = maxRank,
+            })
         end
     end
     return profs

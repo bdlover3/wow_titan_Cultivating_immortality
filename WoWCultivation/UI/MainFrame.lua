@@ -20,14 +20,16 @@ UI.ROW1_BUTTONS = {
 
 -- Row 3: 功能入口
 UI.ROW3_BUTTONS = {
+    { id = "storage",    name = "储物袋",     icon = "Interface\\Icons\\INV_Misc_Bag_10_Green",             sub = "随身行囊",   action = "storage" },
     { id = "bg",         name = "仙域冲突",   icon = "Interface\\Icons\\Ability_Warrior_OffensiveStance", sub = "随机战场",   action = "random_bg" },
     { id = "dungeon",    name = "小秘境夺宝", icon = "Interface\\Icons\\INV_Misc_Head_Dragon_Blue",        sub = "随机组队",   action = "dungeon_finder" },
     { id = "achievement",name = "道果录",     icon = "Interface\\Icons\\INV_Misc_Book_09",                  sub = "修行成就",   action = "achievement" },
-    { id = "treasure2",  name = "灵宝鉴",     icon = "Interface\\Icons\\INV_Chest_Chain_03",                sub = "灵宝图鉴",   action = "equipment" },
+    { id = "treasure2",  name = "灵宝鉴",     icon = "Interface\\Icons\\INV_Chest_Chain_03",                sub = "灵宝图鉴",   action = "treasure_frame" },
     { id = "divinesense",name = "神识探查",   icon = "Interface\\Icons\\Spell_Holy_MindVision",              sub = "探查道友",   action = "divinesense" },
     { id = "meditation", name = "闭关修炼",   icon = "Interface\\Icons\\Spell_Nature_Meditation",           sub = "闭关打坐",   action = "meditation" },
     { id = "arena",      name = "斗法台",     icon = "Interface\\Icons\\Ability_DualWield",                 sub = "竞技场",     action = "arena" },
     { id = "channel",    name = "修仙界",     icon = "Interface\\Icons\\Spell_Holy_MindVision",              sub = "修仙频道",   action = "channel" },
+    { id = "spiritpet",  name = "灵宠",       icon = "Interface\\Icons\\Ability_Hunter_BeastCall",           sub = "本命灵宠",   action = "spiritpet", hunterOnly = true },
 }
 
 -- 采集物数据: 技能要求 → 采集物列表
@@ -288,6 +290,10 @@ function UI:CreateRow3(parent)
     local startX = 14
     self.row3Buttons = {}
 
+    -- Check if player is Hunter for pet button visibility
+    local _, englishClass = UnitClass("player")
+    local isHunter = (englishClass == "HUNTER")
+
     for i, btnData in ipairs(UI.ROW3_BUTTONS) do
         local row = math.floor((i - 1) / cols)
         local col = (i - 1) % cols
@@ -324,6 +330,11 @@ function UI:CreateRow3(parent)
         btn:SetScript("OnClick", function()
             UI:OnRow3Click(btnData.action)
         end)
+
+        -- Hide hunter-only buttons for non-hunters
+        if btnData.hunterOnly and not isHunter then
+            btn:Hide()
+        end
 
         self.row3Buttons[btnData.id] = btn
     end
@@ -520,23 +531,33 @@ end
 -- Row 3 Click Handlers
 -- ============================================================
 function UI:OnRow3Click(action)
-    if action == "random_bg" then
+    if action == "storage" then
+        if WoWCultivation.UI and WoWCultivation.UI.StorageFrame then
+            WoWCultivation.UI.StorageFrame:Toggle()
+        end
+    elseif action == "random_bg" then
         if TogglePVPFrame then
             TogglePVPFrame()
         end
     elseif action == "dungeon_finder" then
-        if ToggleLFDParent then
+        -- WotLK 3.80.1: 直接用 LFDParentFrame
+        if LFDParentFrame then
+            if LFDParentFrame:IsShown() then
+                LFDParentFrame:Hide()
+            else
+                LFDParentFrame:Show()
+            end
+        elseif ToggleLFDParent then
             ToggleLFDParent()
-        elseif LFDParentFrame then
-            LFDParentFrame:Show()
         end
     elseif action == "achievement" then
         if ToggleAchievementFrame then
             ToggleAchievementFrame()
         end
-    elseif action == "equipment" then
-        if ToggleCharacter then
-            ToggleCharacter("PaperDollFrame")
+    elseif action == "treasure_frame" then
+        -- 打开灵宝鉴（装备图鉴面板）
+        if WoWCultivation.UI and WoWCultivation.UI.TreasureFrame then
+            WoWCultivation.UI.TreasureFrame:Toggle()
         end
     elseif action == "divinesense" then
         if WoWCultivation.UI and WoWCultivation.UI.DivineSenseFrame then
@@ -555,6 +576,39 @@ function UI:OnRow3Click(action)
         -- Focus channel "修仙界"
         if WoWCultivation.Modules and WoWCultivation.Modules.ChannelModule then
             WoWCultivation:Print("已切换至修仙界频道")
+        end
+    elseif action == "spiritpet" then
+        -- 猎人灵宠面板
+        local _, englishClass = UnitClass("player")
+        if englishClass == "HUNTER" then
+            -- WotLK: 尝试多种方式打开宠物面板
+            if TogglePetStable then
+                TogglePetStable()
+            elseif PetStableFrame then
+                PetStableFrame:Show()
+            elseif ToggleCharacter then
+                -- 打开角色面板的宠物标签页
+                ToggleCharacter("PetPaperDollFrame")
+            elseif PetPaperDollFrame then
+                PetPaperDollFrame:Show()
+            else
+                -- 最终回退：打开角色面板
+                if ToggleCharacter then
+                    ToggleCharacter("PaperDollFrame")
+                end
+            end
+            -- 如果有在线的宠物，显示宠物信息
+            if UnitExists("pet") then
+                local petName = UnitName("pet") or "未知"
+                local petLevel = UnitLevel("pet") or 0
+                local petHealth = UnitHealth("pet") or 0
+                local petMaxHealth = UnitHealthMax("pet") or 1
+                local healthPct = math.floor(petHealth / petMaxHealth * 100)
+                WoWCultivation:Print(string.format("|cFF44AAFF灵宠·%s|r Lv.%d 气血: %d%%",
+                    petName, petLevel, healthPct))
+            else
+                WoWCultivation:Print("|cFFFFD700灵宠未召唤，你可以前往兽栏管理员处领取~|r")
+            end
         end
     end
 end
@@ -710,6 +764,17 @@ function UI:RefreshRow2()
             isGather = true; gatherType = "mine"
         elseif prof.wowName == "剥皮" or prof.xiuxianName == "妖兽取材" then
             isGather = true; gatherType = "skin"
+        end
+
+        -- 通过 skillLine ID 兜底判断采集类
+        if not isGather and prof.skillLine then
+            if prof.skillLine == 182 or prof.skillLine == 755 then
+                isGather = true; gatherType = "herb"
+            elseif prof.skillLine == 186 or prof.skillLine == 762 then
+                isGather = true; gatherType = "mine"
+            elseif prof.skillLine == 393 then
+                isGather = true; gatherType = "skin"
+            end
         end
 
         -- Get skill level

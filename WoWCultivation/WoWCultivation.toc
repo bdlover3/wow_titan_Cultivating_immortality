@@ -67,3 +67,4 @@ UI\SectWarFrame.lua
 UI\OptionsFrame.lua
 UI\MainFrame.lua
 UI\FavorFrame.lua
+UI\StorageFrame.lua
