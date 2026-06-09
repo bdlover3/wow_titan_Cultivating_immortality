@@ -23,6 +23,7 @@ Data\MilestoneData.lua
 Data\ProfessionData.lua
 Data\ElixirData.lua
 Data\TitleData.lua
+Data\CultivationGuideData.lua
 
 # Locale
 Locale\zhCN.lua
@@ -68,3 +69,5 @@ UI\OptionsFrame.lua
 UI\MainFrame.lua
 UI\FavorFrame.lua
 UI\StorageFrame.lua
+UI\FishingFrame.lua
+UI\TestFrame.lua

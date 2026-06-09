@@ -624,6 +624,9 @@ function Module:OnEnable()
     EM:Register("ZONE_CHANGED_INDOORS", function()
         self:OnZoneChanged()
     end)
+    EM:Register("ZONE_CHANGED_NEW_AREA", function()
+        self:OnZoneChanged()
+    end)
 
     -- 状态提醒事件
     EM:Register("UNIT_HEALTH", function(unit)
@@ -763,6 +766,12 @@ function Module:OnSisterClick()
     if now - self.lastClickChat < self.clickChatCooldown then return end
     self.lastClickChat = now
 
+    -- 对话随机获取仙缘值（~1/10概率）
+    local ImmortalModule = WoWCultivation.Modules and WoWCultivation.Modules.ImmortalDestinyModule
+    if ImmortalModule and ImmortalModule.OnSisterDialog then
+        ImmortalModule:OnSisterDialog()
+    end
+
     local text = self:GetRandomFromList(self.CLICK_CHATS)
     if text then
         self:Say(text)
@@ -839,15 +848,23 @@ end
 function Module:OnZoneChanged()
     local inInstance, instanceType = IsInInstance()
     if inInstance and (instanceType == "party" or instanceType == "raid") then
-        if math.random() < 0.4 then
+        if math.random() < 0.5 then
             local text = self:GetRandomFromList(self.SCENE_CHATS.dungeon)
             if text then self:Say(text) end
         end
     elseif not inInstance then
+        -- 每次切换地图都说话（高概率）
         local _, _, _, _, _, _, _, _, inCity = GetZonePVPInfo()
-        if inCity and math.random() < 0.3 then
-            local text = self:GetRandomFromList(self.SCENE_CHATS.city)
-            if text then self:Say(text) end
+        if inCity then
+            if math.random() < 0.6 then
+                local text = self:GetRandomFromList(self.SCENE_CHATS.city)
+                if text then self:Say(text) end
+            end
+        else
+            if math.random() < 0.5 then
+                local text = self:GetRandomFromList(self.CLICK_CHATS)
+                if text then self:Say(text) end
+            end
         end
     end
 end

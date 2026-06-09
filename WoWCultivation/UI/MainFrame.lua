@@ -8,99 +8,130 @@ UI.name = "MainFrame"
 WoWCultivation.UI.MainFrame = UI
 
 UI.FRAME_WIDTH = 520
-UI.FRAME_HEIGHT = 580
+UI.FRAME_HEIGHT = 640
 
--- Row 1: 四大核心入口
+-- Row 1: 修仙根基（核心+随身功能）
 UI.ROW1_BUTTONS = {
     { id = "treasure",   name = "法宝",   icon = "Interface\\Icons\\INV_Chest_Chain_03", sub = "装备信息", action = "equipment" },
     { id = "quest",      name = "机缘",   icon = "Interface\\Icons\\INV_Misc_Book_03",  sub = "任务日志", action = "questlog" },
-    { id = "sect",       name = "师门",   icon = "Interface\\Icons\\INV_Banner_01",    sub = "宗门帮派", action = "guild" },
+    { id = "sect",       name = "宗门",   icon = "Interface\\Icons\\INV_Banner_01",    sub = "宗门帮派", action = "guild" },
     { id = "technique",  name = "功法",   icon = "Interface\\Icons\\INV_Misc_Book_09", sub = "法术书",   action = "spellbook" },
+    { id = "storage",    name = "储物袋", icon = "Interface\\Icons\\INV_Misc_Bag_10_Green",             sub = "随身行囊",   action = "storage" },
+    { id = "mount",      name = "灵骑",   icon = "Interface\\Icons\\Ability_Mount_Charger",              sub = "坐骑收藏",   action = "mount_journal" },
+    { id = "spiritpet",  name = "灵宠",   icon = "Interface\\Icons\\Ability_Hunter_BeastCall",           sub = "本命灵宠",   action = "spiritpet", hunterOnly = true },
 }
 
--- Row 3: 功能入口
+-- Row 3: 仙途指引
 UI.ROW3_BUTTONS = {
-    { id = "storage",    name = "储物袋",     icon = "Interface\\Icons\\INV_Misc_Bag_10_Green",             sub = "随身行囊",   action = "storage" },
-    { id = "bg",         name = "仙域冲突",   icon = "Interface\\Icons\\Ability_Warrior_OffensiveStance", sub = "随机战场",   action = "random_bg" },
-    { id = "dungeon",    name = "小秘境夺宝", icon = "Interface\\Icons\\INV_Misc_Head_Dragon_Blue",        sub = "随机组队",   action = "dungeon_finder" },
+    { id = "fishing",    name = "灵钓宝鉴",   icon = "Interface\\Icons\\INV_Misc_Fish_02",                   sub = "钓鱼指引",   action = "fishing" },
+    { id = "bg",         name = "仙域冲突",   icon = "Interface\\Icons\\Ability_Warrior_OffensiveStance", sub = "排战场",     action = "random_bg" },
+    { id = "arena",      name = "斗法台",     icon = "Interface\\Icons\\Ability_DualWield",                 sub = "竞技排队",   action = "arena" },
+    { id = "dungeon",    name = "秘境夺宝",   icon = "Interface\\Icons\\INV_Misc_Head_Dragon_Blue",        sub = "随机副本",   action = "dungeon_finder" },
     { id = "achievement",name = "道果录",     icon = "Interface\\Icons\\INV_Misc_Book_09",                  sub = "修行成就",   action = "achievement" },
     { id = "treasure2",  name = "灵宝鉴",     icon = "Interface\\Icons\\INV_Chest_Chain_03",                sub = "灵宝图鉴",   action = "treasure_frame" },
-    { id = "divinesense",name = "神识探查",   icon = "Interface\\Icons\\Spell_Holy_MindVision",              sub = "探查道友",   action = "divinesense" },
-    { id = "meditation", name = "闭关修炼",   icon = "Interface\\Icons\\Spell_Nature_Meditation",           sub = "闭关打坐",   action = "meditation" },
-    { id = "arena",      name = "斗法台",     icon = "Interface\\Icons\\Ability_DualWield",                 sub = "竞技场",     action = "arena" },
-    { id = "channel",    name = "修仙界",     icon = "Interface\\Icons\\Spell_Holy_MindVision",              sub = "修仙频道",   action = "channel" },
-    { id = "spiritpet",  name = "灵宠",       icon = "Interface\\Icons\\Ability_Hunter_BeastCall",           sub = "本命灵宠",   action = "spiritpet", hunterOnly = true },
 }
 
--- 采集物数据: 技能要求 → 采集物列表
+-- Row 4: 道法玄机
+UI.ROW4_BUTTONS = {
+    { id = "divinesense",name = "神识探查",   icon = "Interface\\Icons\\Spell_Holy_MindVision",              sub = "探查道友",   action = "divinesense" },
+    { id = "meditation", name = "闭关修炼",   icon = "Interface\\Icons\\Spell_Nature_Meditation",           sub = "闭关打坐",   action = "meditation" },
+    { id = "channel",    name = "万里传音",   icon = "Interface\\Icons\\Spell_Holy_MindVision",              sub = "修仙频道",   action = "channel" },
+}
+
+-- 采集物数据: 技能要求 → 采集物列表（含分布地点+图标）
+-- 图标路径来源: dvg.cn 80级WLK数据库
 UI.GATHER_DATA = {
     herb = {
         title = "灵植采集",
         items = {
-            { skill = 1,   name = "宁神花",       icon = "Interface\\Icons\\INV_Misc_Herb_06" },
-            { skill = 1,   name = "银叶草",       icon = "Interface\\Icons\\INV_Misc_Herb_07" },
-            { skill = 1,   name = "地根草",       icon = "Interface\\Icons\\INV_Misc_Herb_08" },
-            { skill = 50,  name = "魔皇草",       icon = "Interface\\Icons\\INV_Misc_Herb_03" },
-            { skill = 50,  name = "石南草",       icon = "Interface\\Icons\\INV_Misc_Herb_04" },
-            { skill = 70,  name = "雨燕草",       icon = "Interface\\Icons\\INV_Misc_Herb_05" },
-            { skill = 100, name = "跌打草",       icon = "Interface\\Icons\\INV_Misc_Herb_19" },
-            { skill = 100, name = "荆棘藻",       icon = "Interface\\Icons\\INV_Misc_Herb_15" },
-            { skill = 125, name = "野钢花",       icon = "Interface\\Icons\\INV_Misc_Herb_12" },
-            { skill = 150, name = "皇血草",       icon = "Interface\\Icons\\INV_Misc_Herb_09" },
-            { skill = 160, name = "活根草",       icon = "Interface\\Icons\\INV_Misc_Herb_16" },
-            { skill = 170, name = "卡德加的胡须", icon = "Interface\\Icons\\INV_Misc_Herb_17" },
-            { skill = 185, name = "枯叶草",       icon = "Interface\\Icons\\INV_Misc_Herb_11" },
-            { skill = 205, name = "金棘草",       icon = "Interface\\Icons\\INV_Misc_Herb_01" },
-            { skill = 230, name = "太阳草",       icon = "Interface\\Icons\\INV_Misc_Herb_02" },
-            { skill = 250, name = "盲目草",       icon = "Interface\\Icons\\INV_Misc_Herb_14" },
-            { skill = 260, name = "格罗姆之血",   icon = "Interface\\Icons\\INV_Misc_Herb_10" },
-            { skill = 285, name = "黄金参",       icon = "Interface\\Icons\\INV_Misc_Herb_18" },
-            { skill = 290, name = "梦叶草",       icon = "Interface\\Icons\\INV_Misc_Herb_20" },
-            { skill = 300, name = "山鼠草",       icon = "Interface\\Icons\\INV_Misc_Herb_22" },
-            { skill = 300, name = "冰盖草",       icon = "Interface\\Icons\\INV_Misc_Herb_23" },
-            { skill = 325, name = "魔草",         icon = "Interface\\Icons\\INV_Misc_Herb_24" },
-            { skill = 350, name = "噩梦藤",       icon = "Interface\\Icons\\INV_Misc_Herb_25" },
-            { skill = 375, name = "泰罗果",       icon = "Interface\\Icons\\INV_Misc_Herb_26" },
-            { skill = 425, name = "金苜蓿",       icon = "Interface\\Icons\\INV_Misc_Herb_28" },
-            { skill = 450, name = "冰棘",         icon = "Interface\\Icons\\INV_Misc_Herb_27" },
+            { skill = 1,   name = "宁神花",       zone = "各族新手区域",           icon = "Interface\\Icons\\INV_Misc_Flower_02" },
+            { skill = 1,   name = "银叶草",       zone = "各族新手区域",           icon = "Interface\\Icons\\INV_Misc_Herb_09" },
+            { skill = 1,   name = "地根草",       zone = "各族新手区域",           icon = "Interface\\Icons\\INV_Misc_Root_01" },
+            { skill = 50,  name = "魔皇草",       zone = "银松森林/贫瘠之地",     icon = "Interface\\Icons\\INV_Misc_Herb_07" },
+            { skill = 50,  name = "石南草",       zone = "银松森林/贫瘠之地",     icon = "Interface\\Icons\\INV_Misc_Herb_04" },
+            { skill = 70,  name = "雨燕草",       zone = "贫瘠之地(荆棘藻旁)",     icon = "Interface\\Icons\\INV_Misc_Herb_03" },
+            { skill = 100, name = "跌打草",       zone = "暮色森林/湿地",         icon = "Interface\\Icons\\INV_Misc_Leaf_01" },
+            { skill = 100, name = "荆棘藻",       zone = "各水域岸边",             icon = "Interface\\Icons\\INV_Misc_Herb_10" },
+            { skill = 125, name = "野钢花",       zone = "荆棘谷/阿拉希高地",     icon = "Interface\\Icons\\INV_Misc_Flower_03" },
+            { skill = 150, name = "皇血草",       zone = "荆棘谷/悲伤沼泽",       icon = "Interface\\Icons\\INV_Misc_Herb_05" },
+            { skill = 160, name = "活根草",       zone = "悲伤沼泽/安戈洛环形山", icon = "Interface\\Icons\\INV_Misc_Root_02" },
+            { skill = 170, name = "卡德加的胡须", zone = "悲伤沼泽/辛特兰",       icon = "Interface\\Icons\\INV_Misc_Herb_06" },
+            { skill = 185, name = "枯叶草",       zone = "塔纳利斯/辛特兰",       icon = "Interface\\Icons\\INV_Misc_Herb_11" },
+            { skill = 205, name = "金棘草",       zone = "燃烧平原/灼热峡谷",     icon = "Interface\\Icons\\INV_Misc_Herb_12" },
+            { skill = 230, name = "太阳草",       zone = "燃烧平原/灼热峡谷",     icon = "Interface\\Icons\\INV_Misc_Herb_13" },
+            { skill = 250, name = "盲目草",       zone = "安戈洛环形山/费伍德森林", icon = "Interface\\Icons\\INV_Misc_Herb_14" },
+            { skill = 260, name = "格罗姆之血",   zone = "费伍德森林/诅咒之地",   icon = "Interface\\Icons\\INV_Misc_Herb_15" },
+            { skill = 285, name = "黄金参",       zone = "希利苏斯/东瘟疫之地",   icon = "Interface\\Icons\\INV_Misc_Herb_16" },
+            { skill = 290, name = "梦叶草",       zone = "希利苏斯/东瘟疫之地",   icon = "Interface\\Icons\\INV_Misc_Herb_17" },
+            { skill = 300, name = "山鼠草",       zone = "东瘟疫之地/希利苏斯",   icon = "Interface\\Icons\\INV_Misc_Herb_19" },
+            { skill = 300, name = "冰盖草",       zone = "冬泉谷",                 icon = "Interface\\Icons\\INV_Misc_Herb_18" },
+            { skill = 325, name = "魔草",         zone = "地狱火半岛/赞加沼泽",   icon = "Interface\\Icons\\INV_Misc_Herb_20" },
+            { skill = 350, name = "噩梦藤",       zone = "影月谷/虚空风暴",       icon = "Interface\\Icons\\INV_Misc_Herb_22" },
+            { skill = 375, name = "泰罗果",       zone = "影月谷",                 icon = "Interface\\Icons\\INV_Misc_Herb_21" },
+            { skill = 425, name = "金苜蓿",       zone = "北风苔原/嚎风峡湾",     icon = "Interface\\Icons\\INV_Misc_Herb_25" },
+            { skill = 450, name = "冰棘",         zone = "冰冠冰川/风暴峭壁",     icon = "Interface\\Icons\\INV_Misc_Herb_27" },
         }
     },
     mine = {
         title = "灵矿开采",
         items = {
-            { skill = 1,   name = "铜矿石",   icon = "Interface\\Icons\\INV_Ore_Copper_01" },
-            { skill = 65,  name = "锡矿石",   icon = "Interface\\Icons\\INV_Ore_Tin_01" },
-            { skill = 75,  name = "银矿石",   icon = "Interface\\Icons\\INV_Ore_Silver_01" },
-            { skill = 125, name = "铁矿石",   icon = "Interface\\Icons\\INV_Ore_Iron_01" },
-            { skill = 155, name = "金矿石",   icon = "Interface\\Icons\\INV_Ore_Gold_01" },
-            { skill = 175, name = "秘银矿石", icon = "Interface\\Icons\\INV_Ore_Mithril_01" },
-            { skill = 230, name = "真银矿石", icon = "Interface\\Icons\\INV_Ore_TrueSilver_01" },
-            { skill = 245, name = "瑟银矿石", icon = "Interface\\Icons\\INV_Ore_Thorium_01" },
-            { skill = 300, name = "魔铁矿石", icon = "Interface\\Icons\\INV_Ore_FelIron" },
-            { skill = 325, name = "精金矿石", icon = "Interface\\Icons\\INV_Ore_Adamantite" },
-            { skill = 350, name = "氪金矿石", icon = "Interface\\Icons\\INV_Ore_Eternium" },
-            { skill = 375, name = "钴矿石",   icon = "Interface\\Icons\\INV_Ore_Cobalt" },
-            { skill = 400, name = "萨隆邪铁", icon = "Interface\\Icons\\INV_Ore_Saronite" },
-            { skill = 450, name = "泰坦矿石", icon = "Interface\\Icons\\INV_Ore_Platinum_01" },
+            { skill = 1,   name = "铜矿石",   zone = "各族新手区域",             icon = "Interface\\Icons\\INV_Ore_Copper_01" },
+            { skill = 65,  name = "锡矿石",   zone = "银松森林/贫瘠之地",       icon = "Interface\\Icons\\INV_Ore_Tin_01" },
+            { skill = 75,  name = "银矿石",   zone = "锡矿重生点随机",           icon = "Interface\\Icons\\INV_Ore_Silver_01" },
+            { skill = 125, name = "铁矿石",   zone = "阿拉希高地/荆棘谷",       icon = "Interface\\Icons\\INV_Ore_Iron_01" },
+            { skill = 155, name = "金矿石",   zone = "铁矿重生点随机",           icon = "Interface\\Icons\\INV_Ore_Gold_01" },
+            { skill = 175, name = "秘银矿石", zone = "灼热峡谷/辛特兰",         icon = "Interface\\Icons\\INV_Ore_Mithril_01" },
+            { skill = 230, name = "真银矿石", zone = "秘银/瑟银重生点随机",     icon = "Interface\\Icons\\INV_Ore_Truesilver_01" },
+            { skill = 245, name = "瑟银矿石", zone = "燃烧平原/希利苏斯",       icon = "Interface\\Icons\\INV_Ore_Thorium_01" },
+            { skill = 300, name = "魔铁矿石", zone = "地狱火半岛/赞加沼泽",     icon = "Interface\\Icons\\INV_Ore_FelIron" },
+            { skill = 325, name = "精金矿石", zone = "纳格兰/刀锋山",           icon = "Interface\\Icons\\INV_Ore_Adamantium" },
+            { skill = 350, name = "氪金矿石", zone = "外域各矿脉随机产出",       icon = "Interface\\Icons\\INV_Ore_Khorium" },
+            { skill = 375, name = "钴矿石",   zone = "北风苔原/嚎风峡湾",       icon = "Interface\\Icons\\INV_Ore_Cobalt" },
+            { skill = 400, name = "萨隆邪铁", zone = "龙骨荒野/灰熊丘陵/祖达克", icon = "Interface\\Icons\\INV_Ore_Saronite" },
+            { skill = 450, name = "泰坦矿石", zone = "冰冠冰川/风暴峭壁(稀有)", icon = "Interface\\Icons\\INV_Ore_Titanium" },
         }
     },
     skin = {
         title = "妖兽取材",
         items = {
-            { skill = 1,   name = "轻皮",       icon = "Interface\\Icons\\INV_Misc_Pelt_Bear_01" },
-            { skill = 25,  name = "轻毛皮",     icon = "Interface\\Icons\\INV_Misc_Pelt_Bear_02" },
-            { skill = 100, name = "中皮",       icon = "Interface\\Icons\\INV_Misc_Pelt_Bear_03" },
-            { skill = 100, name = "中毛皮",     icon = "Interface\\Icons\\INV_Misc_Pelt_Bear_02" },
-            { skill = 150, name = "重皮",       icon = "Interface\\Icons\\INV_Misc_Pelt_Bear_01" },
-            { skill = 150, name = "重毛皮",     icon = "Interface\\Icons\\INV_Misc_Pelt_Bear_02" },
-            { skill = 200, name = "厚皮",       icon = "Interface\\Icons\\INV_Misc_Pelt_Bear_03" },
-            { skill = 200, name = "厚毛皮",     icon = "Interface\\Icons\\INV_Misc_Pelt_Bear_02" },
-            { skill = 250, name = "硬甲皮",     icon = "Interface\\Icons\\INV_Misc_Pelt_Bear_01" },
-            { skill = 250, name = "硬甲毛皮",   icon = "Interface\\Icons\\INV_Misc_Pelt_Bear_03" },
-            { skill = 300, name = "结缔皮",     icon = "Interface\\Icons\\INV_Misc_Pelt_Bear_02" },
-            { skill = 350, name = "魔鳞皮",     icon = "Interface\\Icons\\INV_Misc_Slime_01" },
-            { skill = 375, name = "北地皮",     icon = "Interface\\Icons\\INV_Misc_Pelt_Bear_01" },
-            { skill = 425, name = "重北地皮",   icon = "Interface\\Icons\\INV_Misc_Pelt_Bear_03" },
+            { skill = 1,   name = "轻皮",       zone = "各族新手区域野兽",         icon = "Interface\\Icons\\INV_Misc_LeatherScrap_04" },
+            { skill = 25,  name = "轻毛皮",     zone = "各族新手区域野兽(低概率)", icon = "Interface\\Icons\\INV_Misc_Pelt_Wolf_02" },
+            { skill = 100, name = "中皮",       zone = "暮色森林狼人/赤脊山",     icon = "Interface\\Icons\\INV_Misc_LeatherScrap_06" },
+            { skill = 100, name = "中毛皮",     zone = "暮色森林狼人(低概率)",     icon = "Interface\\Icons\\INV_Misc_Pelt_Bear_02" },
+            { skill = 150, name = "重皮",       zone = "荆棘谷猛兽/阿拉希高地",   icon = "Interface\\Icons\\INV_Misc_LeatherScrap_07" },
+            { skill = 150, name = "重毛皮",     zone = "荆棘谷猛兽(低概率)",       icon = "Interface\\Icons\\INV_Misc_Pelt_Bear_02" },
+            { skill = 200, name = "厚皮",       zone = "塔纳利斯/安戈洛环形山",   icon = "Interface\\Icons\\INV_Misc_LeatherScrap_08" },
+            { skill = 200, name = "厚毛皮",     zone = "塔纳利斯野兽(低概率)",     icon = "Interface\\Icons\\INV_Misc_Pelt_Bear_03" },
+            { skill = 250, name = "硬甲皮",     zone = "希利苏斯/冬泉谷",         icon = "Interface\\Icons\\INV_Misc_LeatherScrap_09" },
+            { skill = 250, name = "硬甲毛皮",   zone = "希利苏斯/冬泉谷(低概率)", icon = "Interface\\Icons\\INV_Misc_Pelt_Bear_04" },
+            { skill = 300, name = "结缔皮",     zone = "外域各区域野兽",           icon = "Interface\\Icons\\INV_Misc_LeatherScrap_12" },
+            { skill = 325, name = "重结缔皮",   zone = "纳格兰/刀锋山野兽",       icon = "Interface\\Icons\\INV_Misc_LeatherScrap_13" },
+            { skill = 350, name = "北地皮",     zone = "北风苔原/嚎风峡湾野兽",   icon = "Interface\\Icons\\INV_Misc_LeatherScrap_15" },
+            { skill = 425, name = "重北地皮",   zone = "冰冠冰川/风暴峭壁野兽",   icon = "Interface\\Icons\\INV_Misc_LeatherScrap_16" },
+        }
+    },
+    fish = {
+        title = "灵钓宝鉴",
+        items = {
+            { skill = 1,   name = "美味小鱼",       zone = "各族新手区域" },
+            { skill = 1,   name = "长嘴泥鳅",       zone = "各初级水域" },
+            { skill = 50,  name = "刺须鲶鱼",       zone = "西部荒野/贫瘠之地/银松森林" },
+            { skill = 75,  name = "小口鲤鱼",       zone = "湿地/希尔斯布莱德丘陵" },
+            { skill = 100, name = "白鳞鲑鱼",       zone = "阿拉希高地/荆棘谷" },
+            { skill = 130, name = "石鳞鳕鱼",       zone = "荆棘谷/悲伤沼泽" },
+            { skill = 150, name = "大师级杂鱼",     zone = "塔纳利斯/菲拉斯" },
+            { skill = 175, name = "红鳃鱼",         zone = "辛特兰/灼热峡谷" },
+            { skill = 200, name = "阳鳞鲑鱼",       zone = "燃烧平原/东瘟疫之地" },
+            { skill = 225, name = "夜鳞鲷鱼",       zone = "东瘟疫之地/冬泉谷" },
+            { skill = 250, name = "电鳗",           zone = "东瘟疫之地(斯坦索姆旁)" },
+            { skill = 300, name = "魔鲈鱼",         zone = "地狱火半岛/赞加沼泽" },
+            { skill = 305, name = "刺鳃鲑鱼",       zone = "赞加沼泽/泰罗卡森林" },
+            { skill = 325, name = "菲格鲁泥鱼",     zone = "纳格兰/泰罗卡森林" },
+            { skill = 350, name = "狂暴龙虾",       zone = "泰罗卡森林(高地鱼群)" },
+            { skill = 380, name = "冰鳍鱼",         zone = "北风苔原/嚎风峡湾" },
+            { skill = 400, name = "深海鳗鱼",       zone = "龙骨荒野/灰熊丘陵" },
+            { skill = 430, name = "月光墨鱼",       zone = "祖达克/索拉查盆地" },
+            { skill = 450, name = "皇张大比目鱼",   zone = "冰冠冰川/风暴峭壁" },
         }
     },
 }
@@ -148,9 +179,11 @@ function UI:OnEnable()
 
     self:CreateHeader(f)
     self:CreateStatusBar(f)
+    self:CreateAttributePanel(f)
     self:CreateRow1(f)
     self:CreateRow2(f)
     self:CreateRow3(f)
+    self:CreateRow4(f)
     self:CreateDialogArea(f)
     self:CreateGatherPanel(f)
 
@@ -176,7 +209,7 @@ function UI:CreateHeader(parent)
 
     local title = header:CreateFontString(nil, "OVERLAY", "QuestTitleFontBlackShadow")
     title:SetPoint("CENTER", header, "CENTER", 0, 0)
-    title:SetText("|cFFFFD700✦ 修 仙 宝 典 ✦|r")
+    title:SetText("|cFFFFD700◆ 修 仙 宝 典 ◆|r")
     self.headerTitle = title
 end
 
@@ -204,17 +237,106 @@ function UI:CreateStatusBar(parent)
 end
 
 -- ============================================================
--- Row 1: 法宝 / 机缘 / 师门 / 功法
+-- Attribute Panel - 修仙化属性汇总
+-- ============================================================
+UI.ATTR_NAMES = {
+    { stat = "strength",     name = "力道",   color = "|cFFFF4444" },
+    { stat = "agility",      name = "灵巧",   color = "|cFF44FF44" },
+    { stat = "stamina",      name = "根骨",   color = "|cFFFF8800" },
+    { stat = "intellect",    name = "悟性",   color = "|cFF4488FF" },
+    { stat = "spirit",       name = "神识",   color = "|cFF8844FF" },
+    { stat = "attackPower",  name = "战力",   color = "|cFFFF6600" },
+    { stat = "spellPower",   name = "灵力",   color = "|cFF44AAFF" },
+    { stat = "moveSpeed",    name = "身法",   color = "|cFF1EFF00" },
+}
+
+function UI:CreateAttributePanel(parent)
+    local ap = CreateFrame("Frame", nil, parent, "BackdropTemplate")
+    ap:SetPoint("TOPLEFT", parent, "TOPLEFT", 14, -84)
+    ap:SetPoint("TOPRIGHT", parent, "TOPRIGHT", -14, -84)
+    ap:SetHeight(22)
+    ap:SetBackdrop({
+        bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
+        edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+        tileSize = 8, edgeSize = 8,
+        insets = { left = 2, right = 2, top = 2, bottom = 2 }
+    })
+    ap:SetBackdropColor(0.04, 0.02, 0.08, 0.7)
+    ap:SetBackdropBorderColor(0.4, 0.3, 0.06, 0.5)
+
+    local attrText = ap:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    attrText:SetPoint("LEFT", ap, "LEFT", 8, 0)
+    attrText:SetPoint("RIGHT", ap, "RIGHT", -8, 0)
+    attrText:SetJustifyH("LEFT")
+    attrText:SetText("|cFF888888属性加载中...|r")
+    self.attrText = attrText
+    self.attrPanel = ap
+end
+
+function UI:RefreshAttributePanel()
+    if not self.attrText then return end
+
+    local parts = {}
+    for _, attr in ipairs(UI.ATTR_NAMES) do
+        local value = self:GetAttributeValue(attr.stat)
+        if value and value > 0 then
+            table.insert(parts, attr.color .. attr.name .. ": " .. value .. "|r")
+        end
+    end
+
+    if #parts > 0 then
+        self.attrText:SetText(table.concat(parts, "  "))
+    else
+        self.attrText:SetText("|cFF888888属性加载中...|r")
+    end
+end
+
+function UI:GetAttributeValue(stat)
+    if stat == "strength" then
+        local ok, val = pcall(function() return select(2, UnitStat("player", 1)) end)
+        return ok and val or 0
+    elseif stat == "agility" then
+        local ok, val = pcall(function() return select(2, UnitStat("player", 2)) end)
+        return ok and val or 0
+    elseif stat == "stamina" then
+        local ok, val = pcall(function() return select(2, UnitStat("player", 3)) end)
+        return ok and val or 0
+    elseif stat == "intellect" then
+        local ok, val = pcall(function() return select(2, UnitStat("player", 4)) end)
+        return ok and val or 0
+    elseif stat == "spirit" then
+        local ok, val = pcall(function() return select(2, UnitStat("player", 5)) end)
+        return ok and val or 0
+    elseif stat == "attackPower" then
+        local ok, base, posBuff, negBuff = pcall(UnitAttackPower, "player")
+        if ok then return (base or 0) + (posBuff or 0) + (negBuff or 0) end
+        return 0
+    elseif stat == "spellPower" then
+        local ok, sp = pcall(function()
+            return GetSpellBonusDamage and GetSpellBonusDamage(2) or 0
+        end)
+        return ok and sp or 0
+    elseif stat == "moveSpeed" then
+        local ok, speed = pcall(function()
+            return math.floor((GetUnitSpeed and GetUnitSpeed("player") or 7) / 7 * 100)
+        end)
+        return ok and speed or 100
+    end
+    return 0
+end
+
+-- ============================================================
+-- Row 1: 法宝 / 机缘 / 宗门 / 功法 / 储物袋 / 灵骑 / 灵宠
 -- ============================================================
 function UI:CreateRow1(parent)
     local titleLabel = parent:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    titleLabel:SetPoint("TOPLEFT", parent, "TOPLEFT", 14, -90)
+    titleLabel:SetPoint("TOPLEFT", parent, "TOPLEFT", 14, -96)
     titleLabel:SetText("|cFFFFD700◆ 修仙根基 ◆|r")
 
-    local startY = -112
-    local btnW = 110
-    local btnH = 90
-    local gap = 10
+    local startY = -116
+    local btnW = 64
+    local btnH = 78
+    local gap = 6
     local startX = 14
 
     for i, btnData in ipairs(UI.ROW1_BUTTONS) do
@@ -233,17 +355,13 @@ function UI:CreateRow1(parent)
         btn:SetBackdropBorderColor(0.55, 0.4, 0.08, 0.7)
 
         local icon = btn:CreateTexture(nil, "ARTWORK")
-        icon:SetSize(40, 40)
-        icon:SetPoint("TOP", btn, "TOP", 0, -10)
+        icon:SetSize(32, 32)
+        icon:SetPoint("TOP", btn, "TOP", 0, -8)
         icon:SetTexture(btnData.icon)
 
-        local nameLabel = btn:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-        nameLabel:SetPoint("TOP", icon, "BOTTOM", 0, -4)
+        local nameLabel = btn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+        nameLabel:SetPoint("TOP", icon, "BOTTOM", 0, -3)
         nameLabel:SetText("|cFFFFD700" .. btnData.name .. "|r")
-
-        local subLabel = btn:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-        subLabel:SetPoint("TOP", nameLabel, "BOTTOM", 0, -2)
-        subLabel:SetText("|cFF888888" .. btnData.sub .. "|r")
 
         btn:SetScript("OnEnter", function(self)
             self:SetBackdropBorderColor(0.85, 0.65, 0.13, 1)
@@ -255,6 +373,14 @@ function UI:CreateRow1(parent)
             UI:OnRow1Click(btnData.action)
         end)
 
+        -- Hide hunter-only buttons for non-hunters
+        if btnData.hunterOnly then
+            local _, englishClass = UnitClass("player")
+            if englishClass ~= "HUNTER" then
+                btn:Hide()
+            end
+        end
+
         self["row1_" .. btnData.id] = btn
     end
 end
@@ -264,35 +390,31 @@ end
 -- ============================================================
 function UI:CreateRow2(parent)
     local titleLabel = parent:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    titleLabel:SetPoint("TOPLEFT", parent, "TOPLEFT", 14, -212)
+    titleLabel:SetPoint("TOPLEFT", parent, "TOPLEFT", 14, -202)
     titleLabel:SetText("|cFFFFD700◆ 修仙百艺 ◆|r")
     self.row2Title = titleLabel
 
     self.row2Container = CreateFrame("Frame", nil, parent)
-    self.row2Container:SetPoint("TOPLEFT", parent, "TOPLEFT", 14, -232)
-    self.row2Container:SetPoint("TOPRIGHT", parent, "TOPRIGHT", -14, -232)
+    self.row2Container:SetPoint("TOPLEFT", parent, "TOPLEFT", 14, -222)
+    self.row2Container:SetPoint("TOPRIGHT", parent, "TOPRIGHT", -14, -222)
     self.row2Container:SetHeight(70)
     self.row2Buttons = {}
 end
 
 -- ============================================================
--- Row 3: 功能入口
+-- Row 3: 仙途指引
 -- ============================================================
 function UI:CreateRow3(parent)
     local titleLabel = parent:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    titleLabel:SetPoint("TOPLEFT", parent, "TOPLEFT", 14, -315)
+    titleLabel:SetPoint("TOPLEFT", parent, "TOPLEFT", 14, -305)
     titleLabel:SetText("|cFFFFD700◆ 仙途指引 ◆|r")
 
-    local startY = -335
-    local btnSize = 56
-    local btnGap = 8
-    local cols = 4
+    local startY = -325
+    local btnSize = 50
+    local btnGap = 6
+    local cols = 8
     local startX = 14
     self.row3Buttons = {}
-
-    -- Check if player is Hunter for pet button visibility
-    local _, englishClass = UnitClass("player")
-    local isHunter = (englishClass == "HUNTER")
 
     for i, btnData in ipairs(UI.ROW3_BUTTONS) do
         local row = math.floor((i - 1) / cols)
@@ -331,12 +453,59 @@ function UI:CreateRow3(parent)
             UI:OnRow3Click(btnData.action)
         end)
 
-        -- Hide hunter-only buttons for non-hunters
-        if btnData.hunterOnly and not isHunter then
-            btn:Hide()
-        end
-
         self.row3Buttons[btnData.id] = btn
+    end
+end
+
+-- ============================================================
+-- Row 4: 道法玄机
+-- ============================================================
+function UI:CreateRow4(parent)
+    local titleLabel = parent:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    titleLabel:SetPoint("TOPLEFT", parent, "TOPLEFT", 14, -390)
+    titleLabel:SetText("|cFFFFD700◆ 道法玄机 ◆|r")
+
+    local startY = -410
+    local btnSize = 50
+    local btnGap = 6
+    local startX = 14
+    self.row4Buttons = {}
+
+    for i, btnData in ipairs(UI.ROW4_BUTTONS) do
+        local xOff = startX + (i - 1) * (btnSize + btnGap)
+
+        local btn = CreateFrame("Button", "WoWCultivationRow4_" .. btnData.id, parent, "BackdropTemplate")
+        btn:SetSize(btnSize, btnSize)
+        btn:SetPoint("TOPLEFT", parent, "TOPLEFT", xOff, startY)
+        btn:SetBackdrop({
+            bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
+            edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+            tileSize = 8, edgeSize = 8,
+            insets = { left = 2, right = 2, top = 2, bottom = 2 }
+        })
+        btn:SetBackdropColor(0.06, 0.03, 0.1, 0.85)
+        btn:SetBackdropBorderColor(0.55, 0.4, 0.08, 0.7)
+
+        local icon = btn:CreateTexture(nil, "ARTWORK")
+        icon:SetPoint("TOPLEFT", btn, "TOPLEFT", 6, -4)
+        icon:SetPoint("BOTTOMRIGHT", btn, "BOTTOMRIGHT", -6, 14)
+        icon:SetTexture(btnData.icon)
+
+        local label = btn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+        label:SetPoint("BOTTOM", btn, "BOTTOM", 0, 3)
+        label:SetText("|cFFEEDDAA" .. btnData.name .. "|r")
+
+        btn:SetScript("OnEnter", function(self)
+            self:SetBackdropBorderColor(0.85, 0.65, 0.13, 1)
+        end)
+        btn:SetScript("OnLeave", function(self)
+            self:SetBackdropBorderColor(0.55, 0.4, 0.08, 0.7)
+        end)
+        btn:SetScript("OnClick", function()
+            UI:OnRow4Click(btnData.action)
+        end)
+
+        self.row4Buttons[btnData.id] = btn
     end
 end
 
@@ -434,22 +603,51 @@ function UI:ShowGatherPanel(gatherType)
 
     -- Get current skill level
     local skillLevel = 0
+    local targetSkillID = gatherType == "herb" and 182 or gatherType == "mine" and 186 or gatherType == "skin" and 393 or gatherType == "fish" and 356 or 0
+
+    -- 方法1: 通过技能ID匹配
     for i = 1, GetNumSkillLines() do
-        local sn, isH, _, sr, _, _, _, _, _, _, _, sID = GetSkillLineInfo(i)
-        if not isH and sID == (gatherType == "herb" and 182 or gatherType == "mine" and 186 or gatherType == "skin" and 393 or 0) then
-            skillLevel = sr
-            break
+        local skillName, isHeader, _, skillRank, _, _, _, _, _, _, _, skillID = GetSkillLineInfo(i)
+        if not isHeader then
+            if skillID == targetSkillID then
+                skillLevel = skillRank or 0
+                break
+            end
         end
     end
+
+    -- 方法2: 通过技能名称匹配
+    if skillLevel == 0 then
+        local skillNames = {
+            herb = { "草药学", "草药" },
+            mine = { "采矿", "矿业" },
+            skin = { "剥皮" },
+            fish = { "钓鱼" },
+        }
+        local names = skillNames[gatherType] or {}
+        for i = 1, GetNumSkillLines() do
+            local skillName, isHeader, _, skillRank = GetSkillLineInfo(i)
+            if not isHeader and skillName and skillRank and skillRank > 0 then
+                for _, n in ipairs(names) do
+                    if skillName == n then
+                        skillLevel = skillRank
+                        break
+                    end
+                end
+                if skillLevel > 0 then break end
+            end
+        end
+    end
+
     gp.skillText:SetText("当前技能: |cFF1EFF00" .. skillLevel .. "|r")
 
-    -- Clear old items
+    -- Clear old item frames
     for _, frame in ipairs(gp.itemFrames) do
         frame:Hide()
     end
 
-    -- Create item list
-    local yOffset = -10
+    -- Create item list (icon + skill + name + zone)
+    local yOffset = -8
     for i, item in ipairs(data.items) do
         local itemFrame
         if gp.itemFrames[i] then
@@ -457,30 +655,77 @@ function UI:ShowGatherPanel(gatherType)
             itemFrame:Show()
         else
             itemFrame = CreateFrame("Frame", nil, gp.contentBg)
-            itemFrame:SetSize(310, 18)
-            itemFrame:SetPoint("TOPLEFT", gp.contentBg, "TOPLEFT", 8, 0)
+            itemFrame:SetSize(310, 20)
+            itemFrame:SetPoint("TOPLEFT", gp.contentBg, "TOPLEFT", 4, 0)
+
+            -- 图标 - 放在技能等级的位置(替换方框)
+            local iconTex = itemFrame:CreateTexture(nil, "ARTWORK")
+            iconTex:SetSize(16, 16)
+            iconTex:SetPoint("LEFT", itemFrame, "LEFT", 2, 0)
+            itemFrame.iconTex = iconTex
 
             local skillText = itemFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-            skillText:SetPoint("LEFT", itemFrame, "LEFT", 0, 0)
-            skillText:SetWidth(50)
+            skillText:SetPoint("LEFT", itemFrame, "LEFT", 22, 0)
+            skillText:SetWidth(36)
             skillText:SetJustifyH("RIGHT")
             itemFrame.skillText = skillText
 
-            local itemText = itemFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-            itemText:SetPoint("LEFT", itemFrame, "LEFT", 55, 0)
-            itemFrame.itemText = itemText
+            local nameText = itemFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+            nameText:SetPoint("LEFT", itemFrame, "LEFT", 62, 0)
+            nameText:SetWidth(80)
+            nameText:SetJustifyH("LEFT")
+            itemFrame.nameText = nameText
+
+            local zoneText = itemFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+            zoneText:SetPoint("LEFT", itemFrame, "LEFT", 144, 0)
+            zoneText:SetPoint("RIGHT", itemFrame, "RIGHT", -4, 0)
+            zoneText:SetJustifyH("LEFT")
+            itemFrame.zoneText = zoneText
 
             gp.itemFrames[i] = itemFrame
         end
 
         local unlocked = skillLevel >= item.skill
         local color = unlocked and "|cFF1EFF00" or "|cFFFF0000"
-        local statusIcon = unlocked and "✓" or "✗"
+
+        -- 图标：优先使用硬编码icon字段，其次用GetItemInfo运行时获取
+        if item.icon then
+            pcall(function() itemFrame.iconTex:SetTexture(item.icon) end)
+            itemFrame.iconTex:Show()
+        else
+            local iconPath = nil
+            pcall(function()
+                local _, _, _, _, _, _, _, _, _, itemTexture = GetItemInfo(item.name)
+                if itemTexture then
+                    iconPath = itemTexture
+                else
+                    -- 鱼类尝试"新鲜的"前缀
+                    if gatherType == "fish" then
+                        local _, _, _, _, _, _, _, _, _, altTexture = GetItemInfo("新鲜的" .. item.name)
+                        if altTexture then iconPath = altTexture end
+                    end
+                end
+            end)
+
+            if iconPath then
+                itemFrame.iconTex:SetTexture(iconPath)
+            else
+                local defaultIcons = {
+                    herb = "Interface\\Icons\\INV_Misc_Herb_15",
+                    mine = "Interface\\Icons\\INV_Ore_Copper_01",
+                    skin = "Interface\\Icons\\INV_Misc_Pelt_Wolf_01",
+                    fish = "Interface\\Icons\\INV_Misc_Fish_02",
+                }
+                pcall(function() itemFrame.iconTex:SetTexture(defaultIcons[gatherType] or "") end)
+            end
+            itemFrame.iconTex:Show()
+        end
 
         itemFrame.skillText:SetText(color .. item.skill .. "|r")
-        itemFrame.itemText:SetText(color .. statusIcon .. " " .. item.name .. "|r")
-        itemFrame:SetPoint("TOPLEFT", gp.contentBg, "TOPLEFT", 8, yOffset)
-        yOffset = yOffset - 16
+        itemFrame.nameText:SetText(color .. " " .. item.name .. "|r")
+        itemFrame.zoneText:SetText("|cFF88CCFF" .. (item.zone or "") .. "|r")
+        itemFrame:SetPoint("TOPLEFT", gp.contentBg, "TOPLEFT", 4, yOffset)
+        yOffset = yOffset - 22
     end
 
     gp:Show()
@@ -510,6 +755,48 @@ function UI:OnRow1Click(action)
         if ToggleSpellBook then
             ToggleSpellBook("spell")
         end
+    elseif action == "storage" then
+        pcall(function()
+            if ToggleAllBags then
+                ToggleAllBags()
+            elseif OpenAllBags then
+                OpenAllBags()
+            elseif OpenBackpack then
+                OpenBackpack()
+            end
+        end)
+    elseif action == "mount_journal" then
+        pcall(function()
+            if ToggleCollectionsJournal then
+                ToggleCollectionsJournal(1)
+            elseif CollectionsJournal then
+                CollectionsJournal:Show()
+            end
+        end)
+    elseif action == "spiritpet" then
+        local _, englishClass = UnitClass("player")
+        if englishClass == "HUNTER" then
+            pcall(function()
+                if TogglePetStable then
+                    TogglePetStable()
+                elseif PetStableFrame then
+                    PetStableFrame:Show()
+                elseif ToggleCharacter then
+                    ToggleCharacter("PetPaperDollFrame")
+                end
+            end)
+            if UnitExists("pet") then
+                local petName = UnitName("pet") or "未知"
+                local petLevel = UnitLevel("pet") or 0
+                local petHealth = UnitHealth("pet") or 0
+                local petMaxHealth = UnitHealthMax("pet") or 1
+                local healthPct = math.floor(petHealth / petMaxHealth * 100)
+                WoWCultivation:Print(string.format("|cFF44AAFF灵宠·%s|r Lv.%d 气血: %d%%",
+                    petName, petLevel, healthPct))
+            else
+                WoWCultivation:Print("|cFFFFD700灵宠未召唤，你可以前往兽栏管理员处领取~|r")
+            end
+        end
     end
 end
 
@@ -531,35 +818,62 @@ end
 -- Row 3 Click Handlers
 -- ============================================================
 function UI:OnRow3Click(action)
-    if action == "storage" then
-        if WoWCultivation.UI and WoWCultivation.UI.StorageFrame then
-            WoWCultivation.UI.StorageFrame:Toggle()
+    if action == "fishing" then
+        if WoWCultivation.UI and WoWCultivation.UI.FishingFrame then
+            WoWCultivation.UI.FishingFrame:Toggle()
         end
     elseif action == "random_bg" then
-        if TogglePVPFrame then
-            TogglePVPFrame()
-        end
-    elseif action == "dungeon_finder" then
-        -- WotLK 3.80.1: 直接用 LFDParentFrame
-        if LFDParentFrame then
-            if LFDParentFrame:IsShown() then
-                LFDParentFrame:Hide()
-            else
-                LFDParentFrame:Show()
+        -- 天界冲突：打开PVP排队界面（排战场）
+        pcall(function()
+            if TogglePVPUI then
+                TogglePVPUI()
+            elseif PVPUIFrame then
+                if PVPUIFrame:IsShown() then PVPUIFrame:Hide() else PVPUIFrame:Show() end
+            elseif PVPMicroButton then
+                PVPMicroButton:Click()
             end
-        elseif ToggleLFDParent then
-            ToggleLFDParent()
-        end
+        end)
+    elseif action == "arena" then
+        -- 斗法台：打开竞技场排队界面
+        pcall(function()
+            if TogglePVPUI then
+                TogglePVPUI()
+            elseif PVPUIFrame then
+                if PVPUIFrame:IsShown() then PVPUIFrame:Hide() else PVPUIFrame:Show() end
+            elseif PVPParentFrame then
+                PVPParentFrame:Show()
+            end
+        end)
+    elseif action == "dungeon_finder" then
+        pcall(function()
+            if PVEFrame_ToggleFrame then
+                PVEFrame_ToggleFrame("GroupFinderFrame", "LFDParentFrame")
+            elseif ToggleLFDParent then
+                ToggleLFDParent()
+            elseif LFDParentFrame then
+                if LFDParentFrame:IsShown() then
+                    LFDParentFrame:Hide()
+                else
+                    LFDParentFrame:Show()
+                end
+            end
+        end)
     elseif action == "achievement" then
         if ToggleAchievementFrame then
             ToggleAchievementFrame()
         end
     elseif action == "treasure_frame" then
-        -- 打开灵宝鉴（装备图鉴面板）
         if WoWCultivation.UI and WoWCultivation.UI.TreasureFrame then
             WoWCultivation.UI.TreasureFrame:Toggle()
         end
-    elseif action == "divinesense" then
+    end
+end
+
+-- ============================================================
+-- Row 4 Click Handlers
+-- ============================================================
+function UI:OnRow4Click(action)
+    if action == "divinesense" then
         if WoWCultivation.UI and WoWCultivation.UI.DivineSenseFrame then
             local data = self:GetCurrentPlayerData()
             WoWCultivation.UI.DivineSenseFrame:Show(data)
@@ -568,47 +882,9 @@ function UI:OnRow3Click(action)
         if WoWCultivation.UI and WoWCultivation.UI.MeditationFrame then
             WoWCultivation.UI.MeditationFrame:Toggle()
         end
-    elseif action == "arena" then
-        if TogglePVPFrame then
-            TogglePVPFrame()
-        end
     elseif action == "channel" then
-        -- Focus channel "修仙界"
         if WoWCultivation.Modules and WoWCultivation.Modules.ChannelModule then
-            WoWCultivation:Print("已切换至修仙界频道")
-        end
-    elseif action == "spiritpet" then
-        -- 猎人灵宠面板
-        local _, englishClass = UnitClass("player")
-        if englishClass == "HUNTER" then
-            -- WotLK: 尝试多种方式打开宠物面板
-            if TogglePetStable then
-                TogglePetStable()
-            elseif PetStableFrame then
-                PetStableFrame:Show()
-            elseif ToggleCharacter then
-                -- 打开角色面板的宠物标签页
-                ToggleCharacter("PetPaperDollFrame")
-            elseif PetPaperDollFrame then
-                PetPaperDollFrame:Show()
-            else
-                -- 最终回退：打开角色面板
-                if ToggleCharacter then
-                    ToggleCharacter("PaperDollFrame")
-                end
-            end
-            -- 如果有在线的宠物，显示宠物信息
-            if UnitExists("pet") then
-                local petName = UnitName("pet") or "未知"
-                local petLevel = UnitLevel("pet") or 0
-                local petHealth = UnitHealth("pet") or 0
-                local petMaxHealth = UnitHealthMax("pet") or 1
-                local healthPct = math.floor(petHealth / petMaxHealth * 100)
-                WoWCultivation:Print(string.format("|cFF44AAFF灵宠·%s|r Lv.%d 气血: %d%%",
-                    petName, petLevel, healthPct))
-            else
-                WoWCultivation:Print("|cFFFFD700灵宠未召唤，你可以前往兽栏管理员处领取~|r")
-            end
+            WoWCultivation:Print("已切换至万里传音频道")
         end
     end
 end
@@ -669,24 +945,11 @@ function UI:RefreshInfo()
         )
     end
 
+    -- Attribute panel
+    self:RefreshAttributePanel()
+
     -- Row 2 - Refresh professions
     self:RefreshRow2()
-
-    -- Update 仙域冲突 button label based on faction
-    if self.row3Buttons and self.row3Buttons.bg then
-        local faction = UnitFactionGroup("player") or ""
-        local label = self.row3Buttons.bg:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-        -- Update existing label
-        for _, child in ipairs({self.row3Buttons.bg:GetRegions()}) do
-            if child and child.GetObjectType and child:GetObjectType() == "FontString" then
-                local factionName = faction == "Horde" and "灵界" or faction == "Alliance" and "天界" or ""
-                if factionName ~= "" then
-                    child:SetText("|cFFEEDDAA" .. factionName .. "冲突|r")
-                end
-                break
-            end
-        end
-    end
 end
 
 function UI:RefreshRow2()
@@ -764,6 +1027,8 @@ function UI:RefreshRow2()
             isGather = true; gatherType = "mine"
         elseif prof.wowName == "剥皮" or prof.xiuxianName == "妖兽取材" then
             isGather = true; gatherType = "skin"
+        elseif prof.wowName == "钓鱼" or prof.wowName == "Fishing" or prof.xiuxianName == "灵钓宝鉴" then
+            isGather = true; gatherType = "fish"
         end
 
         -- 通过 skillLine ID 兜底判断采集类
@@ -774,6 +1039,8 @@ function UI:RefreshRow2()
                 isGather = true; gatherType = "mine"
             elseif prof.skillLine == 393 then
                 isGather = true; gatherType = "skin"
+            elseif prof.skillLine == 356 then
+                isGather = true; gatherType = "fish"
             end
         end
 

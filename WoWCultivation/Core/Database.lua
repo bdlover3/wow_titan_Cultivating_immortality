@@ -54,6 +54,7 @@ local DEFAULT_CHAR_DB = {
         milestones = {},
     },
     immortalDestiny = 0,
+    fishingStats = { totalCasts = 0, fishCaught = {} },
     firstLoad = true,
     sisterPosition = { point = "CENTER", x = 300, y = 0 },
 }

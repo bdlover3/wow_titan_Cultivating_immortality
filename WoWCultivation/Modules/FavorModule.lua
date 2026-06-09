@@ -8,8 +8,9 @@ Module.FAVOR_LEVELS = {
     { min = 200,  name = "友善",   title = "师兄",   color = "|cFF1EFF00" },
     { min = 500,  name = "好感",   title = "师弟",   color = "|cFF0070DD" },
     { min = 1000, name = "亲密",   title = "哥哥",   color = "|cFFA335EE" },
-    { min = 2000, name = "倾心",   title = "哥哥",   color = "|cFFFF8000" },
-    { min = 5000, name = "挚爱",   title = "夫君",   color = "|cFFE6CC80" },
+    { min = 5000, name = "倾心",   title = "哥哥",   color = "|cFFFF8000" },
+    { min = 15000,name = "挚爱",   title = "夫君",   color = "|cFFE6CC80" },
+    { min = 30000,name = "满好感", title = "主人",   color = "|cFFFF3366" },
 }
 
 Module.GIFTS = {
@@ -200,12 +201,13 @@ Module.DIALOG_CHOICES = {
 }
 
 Module.FAVOR_MILESTONES = {
-    [50]   = { text = "灵儿觉得师兄是个好人呢~",              level = "相识" },
-    [200]  = { text = "和师兄在一起，灵儿觉得很安心。",        level = "友善" },
-    [500]  = { text = "师兄...灵儿开始离不开你了...",          level = "好感" },
-    [1000] = { text = "灵儿...想一直陪在哥哥身边...",          level = "亲密" },
-    [2000] = { text = "哥哥...灵儿的心里只有你一个人...",      level = "倾心" },
-    [5000] = { text = "夫君...此生此世，灵儿只愿与你相伴...",  level = "挚爱" },
+    [50]    = { text = "灵儿觉得师兄是个好人呢~",              level = "相识" },
+    [200]   = { text = "和师兄在一起，灵儿觉得很安心。",        level = "友善" },
+    [500]   = { text = "师兄...灵儿开始离不开你了...",          level = "好感" },
+    [1000]  = { text = "灵儿...想一直陪在哥哥身边...",          level = "亲密" },
+    [5000]  = { text = "哥哥...灵儿的心里除了你再也装不下任何人了...", level = "倾心" },
+    [15000] = { text = "夫君...此生此世，灵儿只愿与你相伴，纵使轮回千转亦不变...", level = "挚爱" },
+    [30000] = { text = "主人...灵儿的一切都是你的，生生世世，永不分离...", level = "满好感" },
 }
 
 Module.FAVOR_SOURCE = {
@@ -365,6 +367,14 @@ function Module:AddFavor(amount, source)
     local db = WoWCultivationCharDB
     if not db.favor then return end
 
+    -- 最后两级（倾心/挚爱）普通互动不再增加好感
+    -- 普通互动 = PASSIVE(陪伴) / DIALOG(对话选择)
+    local currentLevel = self:GetFavorLevel()
+    local isEndgameLevel = (currentLevel.name == "倾心" or currentLevel.name == "挚爱")
+    if isEndgameLevel and (source == "PASSIVE" or source == "DIALOG") then
+        return  -- 最后两级不再接受普通互动
+    end
+
     local oldLevel = self:GetFavorLevelName()
     db.favor.value = (db.favor.value or 0) + amount
     if amount > 0 then
@@ -395,8 +405,9 @@ function Module:OnFavorLevelUp(oldLevel, newLevel)
         ["友善"] = "和师兄在一起，灵儿觉得很安心。",
         ["好感"] = "师兄...灵儿开始离不开你了...",
         ["亲密"] = title .. "...灵儿想一直陪在你身边...",
-        ["倾心"] = title .. "...灵儿的心里只有你一个人...",
-        ["挚爱"] = title .. "...此生此世，灵儿只愿与你相伴...",
+        ["倾心"] = title .. "...灵儿的心里除了你再也装不下任何人了...",
+        ["挚爱"] = title .. "...此生此世，灵儿只愿与你相伴，纵使轮回千转亦不变...",
+        ["满好感"] = title .. "！灵儿的一切都是你的...生生世世，永不分离...",
     }
 
     local msg = messages[newLevel]

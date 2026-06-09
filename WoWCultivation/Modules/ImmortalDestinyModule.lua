@@ -12,7 +12,12 @@ Module.SOURCE = {
     ELITE_KILL = { min = 5,  max = 12, name = "击杀精英妖兽" },
     QUEST      = { min = 8,  max = 20, name = "历练功成" },
     GATHER     = { min = 2,  max = 5,  name = "采集灵材" },
+    LEVEL_UP   = { min = 15, max = 25, name = "境界突破" },
+    DUNGEON    = { min = 10, max = 30, name = "秘境探索" },
+    DIALOG     = { min = 1,  max = 1,  name = "与灵儿对话" },
 }
+
+Module.DIALOG_FORTUNE_CHANCE = 0.1  -- 对话有10%概率获得仙缘
 
 function Module:OnEnable()
     self.enabled = true
@@ -68,6 +73,25 @@ function Module:RegisterEvents()
         end)
     end
 
+    -- 升级获取仙缘
+    EM:Register("PLAYER_LEVEL_UP", function(level)
+        self:Add(math.random(self.SOURCE.LEVEL_UP.min, self.SOURCE.LEVEL_UP.max), "LEVEL_UP")
+    end)
+
+    -- 进入副本获取仙缘
+    EM:Register("ZONE_CHANGED", function()
+        local inInstance, instanceType = IsInInstance()
+        if inInstance and (instanceType == "party" or instanceType == "raid") then
+            self:Add(math.random(self.SOURCE.DUNGEON.min, self.SOURCE.DUNGEON.max), "DUNGEON")
+        end
+    end)
+    EM:Register("ZONE_CHANGED_INDOORS", function()
+        local inInstance, instanceType = IsInInstance()
+        if inInstance and (instanceType == "party" or instanceType == "raid") then
+            self:Add(math.random(self.SOURCE.DUNGEON.min, self.SOURCE.DUNGEON.max), "DUNGEON")
+        end
+    end)
+
     -- 采集检测 - 技能等级变化
     self.lastSkillLevels = {}
     self:UpdateSkillSnapshot()
@@ -121,6 +145,13 @@ function Module:Add(amount, source, detail)
     end
 
     WoWCultivation.Core.EventManager:Trigger("IMMORTAL_DESTINY_CHANGED", db.immortalDestiny, amount, source)
+end
+
+-- 对话时随机获得仙缘（概率 ~1/10）
+function Module:OnSisterDialog()
+    if math.random() < Module.DIALOG_FORTUNE_CHANCE then
+        self:Add(1, "DIALOG")
+    end
 end
 
 function Module:GetValue()

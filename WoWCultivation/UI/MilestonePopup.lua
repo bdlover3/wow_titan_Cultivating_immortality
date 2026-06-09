@@ -34,7 +34,7 @@ function UI:OnEnable()
 
     local topDeco = f:CreateFontString(nil, "OVERLAY", "GameFontNormalHuge")
     topDeco:SetPoint("TOP", f, "TOP", 0, -12)
-    topDeco:SetText("|cFFFFD700✦ ✦ ✦|r")
+    topDeco:SetText("|cFFFFD700◆ ◆ ◆|r")
     f.topDeco = topDeco
 
     local title = f:CreateFontString(nil, "OVERLAY", "QuestTitleFontBlackShadow")
@@ -58,7 +58,7 @@ function UI:OnEnable()
 
     local bottomDeco = f:CreateFontString(nil, "OVERLAY", "GameFontNormalHuge")
     bottomDeco:SetPoint("BOTTOM", f, "BOTTOM", 0, 10)
-    bottomDeco:SetText("|cFFFFD700✦ ✦ ✦|r")
+    bottomDeco:SetText("|cFFFFD700◆ ◆ ◆|r")
     f.bottomDeco = bottomDeco
 
     local closeBtn = CreateFrame("Button", nil, f, "UIPanelCloseButton")

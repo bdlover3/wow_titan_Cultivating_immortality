@@ -32,45 +32,64 @@ UI.BLOOD_ELF_DISPLAY_IDS = {
     13737, 16117, 16084,
 }
 
+-- AnimationDataEnum: 标准 WoW .m2 动画类型索引
+-- 参考: Blizzard_APIDocumentationGenerated/FrameAPICharacterModelBaseDocumentation.lua
+-- SetAnimation(animDataEnum, variation) — anim 参数为此枚举值
+-- 使用 HasAnimation(id) 检测模型是否支持某动画
 UI.ANIM = {
-    IDLE = 0,
-    TALK = 1,
-    LAUGH = 22,
-    DANCE = 10,
-    WAVE = 43,
-    CHEER = 4,
-    RUDE = 35,
-    KISS = 23,
-    SHY = 37,
-    CRY = 7,
-    POINT = 28,
-    SALUTE = 33,
-    YES = 39,
-    NO = 26,
-    SIT = 5,
-    SLEEP = 5,
-    EAT = 14,
-    EMOTE_TALK = 60,
-    EMOTE_DANCE = 94,
-    EMOTE_LAUGH = 65,
-    EMOTE_WAVE = 66,
-    EMOTE_SHY = 63,
-    EMOTE_KISS = 58,
-    EMOTE_CHEER = 71,
-    WALK = 60,
-    RUN = 61,
+    IDLE        = 0,    -- Stand
+    DEATH       = 1,    -- Death
+    SPELL       = 2,    -- SpellOmni
+    SPELL_AREA  = 7,    -- SpellArea
+    READY1H     = 8,    -- Ready1H (用户确认ID8可见响应)
+    COMBAT1H    = 15,   -- Combat1H
+    COMBAT2H    = 16,   -- Combat2H
+    RUN         = 22,   -- Run
+    WALK        = 23,   -- Walk
+    WALK_BACK   = 24,   -- WalkBackwards
+    SWIM        = 25,   -- Swim
+    ATTACK1H    = 27,   -- Attack1H
+    -- Emote 系列 (AnimationDataEnum 60+)
+    EMOTE_TALK  = 60,   -- EmoteTalk
+    EMOTE_TALK2 = 61,   -- EmoteTalkNoSheath
+    EMOTE_POINT = 62,   -- EmotePoint
+    EMOTE_SALUTE= 63,   -- EmoteSalute
+    EMOTE_DANCE = 64,   -- EmoteDance
+    EMOTE_LAUGH = 65,   -- EmoteLaugh
+    EMOTE_WAVE  = 66,   -- EmoteWave
+    EMOTE_CHEER = 67,   -- EmoteCheer
+    EMOTE_RUDE  = 68,   -- EmoteRude
+    EMOTE_SHY   = 69,   -- EmoteShy
+    EMOTE_KISS  = 70,   -- EmoteKiss
+    EMOTE_CRY   = 71,   -- EmoteCry
+    EMOTE_YES   = 72,   -- EmoteYes
+    EMOTE_NO    = 73,   -- EmoteNo
+    SIT         = 80,   -- Sit (近似值)
+    SLEEP       = 82,   -- Sleep (近似值)
 }
 
-UI.TALK_ANIMS = { 1, 60, 43, 28 }
+-- 说话动画候选列表（按优先级排列，第一个可用的会被使用）
+UI.TALK_ANIMS = { UI.ANIM.EMOTE_TALK, UI.ANIM.READY1H, 1 }
 UI.IDLE_ANIMS = { 0, 10, 22, 43, 37, 58 }
 UI.isPortraitMode = false  -- 头像模式/全身模式切换
 
 UI.RADIAL_MENU = {
-    { label = "对话", icon = "Interface\\Icons\\INV_Misc_Book_07", action = "talk" },
+    { label = "修炼指引", icon = "Interface\\Icons\\INV_Misc_Book_02", action = "guide" },
     { label = "跳舞", icon = "Interface\\Icons\\Spell_Nature_MoonGlow", action = "dance" },
     { label = "好感度", icon = "Interface\\Icons\\INV_ValentinesCard02", action = "favor" },
     { label = "修炼面板", icon = "Interface\\Icons\\Spell_Holy_DivineSpirit", action = "panel" },
-    { label = "设置", icon = "Interface\\Icons\\INV_Misc_Wrench_01", action = "settings" },
+    { label = "换装", icon = "Interface\\Icons\\INV_Misc_Wrench_01", action = "modelselect" },
+    { label = "设置", icon = "Interface\\Icons\\INV_Misc_Gear_01", action = "settings" },
+}
+
+-- 小师妹模型预设库
+UI.MODEL_PRESETS = {
+    { name = "|cFFEEAAAA吉安娜（经典蓝裙）|r", id = 30865 },
+    { name = "|cFFFFD700希女王（经典）|r", id = 28213 },
+    { name = "|cFFFF6644红龙女王|r", id = 28227 },
+    { name = "血精灵女", id = 20370 },
+    { name = "人类女", id = 19724 },
+    { name = "侏儒女", id = 20320 },
 }
 
 SLASH_WOWCULTIVATIONSISTER1 = "/wcsi"
@@ -139,13 +158,37 @@ local function ModelIsLoaded(mf)
     return false
 end
 
+local function ModelHasAnim(mf, animId)
+    if not mf then return false end
+    local ok, result = pcall(function()
+        return mf:HasAnimation(animId)
+    end)
+    return ok and result == true
+end
+
 local function TrySetAnimation(mf, animId, variation)
     if not mf then return false end
     variation = variation or 0
+    -- 检测模型是否支持该动画
+    if not ModelHasAnim(mf, animId) then
+        return false
+    end
     local ok = pcall(function()
         mf:SetAnimation(animId, variation)
     end)
     return ok
+end
+
+-- 尝试播放动画列表中第一个模型支持的动画
+local function TrySetAnimationFromList(mf, animList, variation)
+    if not mf or not animList then return false end
+    variation = variation or 0
+    for _, animId in ipairs(animList) do
+        if TrySetAnimation(mf, animId, variation) then
+            return animId
+        end
+    end
+    return false
 end
 
 function UI:OnEnable()
@@ -215,18 +258,60 @@ function UI:OnEnable()
     end, "创建模型框架")
 
     SafeCall(function()
-        -- 点击交互层：用 Frame + EnableMouse + OnMouseDown，不创建任何纹理避免遮挡模型
+        -- 点击交互层：右键拖拽调整模型上下位置，左键对话，右键点击菜单
         self.clickButton = CreateFrame("Frame", nil, self.frame)
         local cb = self.clickButton
         cb:SetSize(UI.MODEL_WIDTH, UI.MODEL_HEIGHT)
         cb:SetPoint("CENTER", self.frame, "CENTER", 0, -10)
         cb:SetFrameLevel(100)
         cb:EnableMouse(true)
+        cb:SetMovable(false)
+
+        cb.isRightDragging = false
+        cb.rightDragStartY = 0
+        cb.modelStartY = 0
+        cb.rightDragTotalDelta = 0
+
         cb:SetScript("OnMouseDown", function(self, button)
             if button == "LeftButton" then
                 UI:OnLeftClick()
             elseif button == "RightButton" then
-                UI:OnRightClick()
+                self.isRightDragging = true
+                self.rightDragTotalDelta = 0
+                local _, mouseY = GetCursorPosition()
+                self.rightDragStartY = mouseY
+                self.modelStartY = UI.modelPosY or 0
+            end
+        end)
+
+        cb:SetScript("OnMouseUp", function(self, button)
+            if button == "RightButton" then
+                self.isRightDragging = false
+                -- 如果拖拽距离很小（<5px），视为点击 → 打开菜单
+                if math.abs(self.rightDragTotalDelta) < 5 then
+                    UI:OnRightClick()
+                end
+            end
+        end)
+
+        cb:SetScript("OnUpdate", function(self, elapsed)
+            if not self.isRightDragging then return end
+            local _, mouseY = GetCursorPosition()
+            local delta = mouseY - self.rightDragStartY
+            self.rightDragTotalDelta = delta
+
+            -- SetPosition(x, y, z): z 控制上下位移
+            -- 将鼠标Y轴移动映射到模型Z轴位置（范围: -2.0 ~ 2.0）
+            local newZ = self.modelStartY + delta * 0.01
+            if newZ > 2.0 then newZ = 2.0 end
+            if newZ < -2.0 then newZ = -2.0 end
+
+            UI.modelPosY = newZ
+            local mf = UI.modelFrame
+            if mf then
+                pcall(function()
+                    mf:SetPosition(0, 0, newZ)
+                end)
             end
         end)
     end, "创建点击交互层")
@@ -298,6 +383,17 @@ function UI:OnEnable()
         db.text:SetJustifyH("LEFT")
         db.text:SetJustifyV("TOP")
         db.text:SetTextColor(1, 0.9, 0.7)
+
+        -- 点击关闭对话气泡（任意位置点击即可关闭）
+        db:EnableMouse(true)
+        local closeHint = db:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+        closeHint:SetPoint("BOTTOMRIGHT", db, "BOTTOMRIGHT", -6, 3)
+        closeHint:SetText("|cFF888888点击关闭|r")
+        closeHint:SetTextColor(0.5, 0.5, 0.5)
+        db.closeHint = closeHint
+        db:SetScript("OnMouseDown", function()
+            UI:HideDialog()
+        end)
     end, "创建对话气泡")
 
     SafeCall(function()
@@ -435,6 +531,195 @@ function UI:TogglePortraitMode()
     end
 end
 
+-- ============================================================
+-- 小师妹换装面板（模型预设选择）
+-- ============================================================
+function UI:CreateModelSelectFrame()
+    local msf = CreateFrame("Frame", "WoWCultivationSisterModelSelect", UIParent, "BackdropTemplate")
+    msf:SetSize(260, 380)
+    msf:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+    msf:SetBackdrop({
+        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+        tile = true, tileSize = 16, edgeSize = 20,
+        insets = { left = 6, right = 6, top = 6, bottom = 6 }
+    })
+    msf:SetBackdropColor(0.06, 0.03, 0.1, 0.97)
+    msf:SetBackdropBorderColor(0.85, 0.65, 0.13, 1)
+    msf:SetFrameStrata("DIALOG")
+    msf:SetClampedToScreen(true)
+    msf:SetMovable(true)
+    msf:EnableMouse(true)
+    msf:RegisterForDrag("LeftButton")
+    msf:SetScript("OnDragStart", msf.StartMoving)
+    msf:SetScript("OnDragStop", msf.StopMovingOrSizing)
+
+    local title = msf:CreateFontString(nil, "OVERLAY", "QuestTitleFontBlackShadow")
+    title:SetPoint("TOP", msf, "TOP", 0, -12)
+    title:SetText("|cFFFFD700◆ 小师妹 · 换装 ◆|r")
+
+    local closeBtn = CreateFrame("Button", nil, msf, "UIPanelCloseButton")
+    closeBtn:SetPoint("TOPRIGHT", msf, "TOPRIGHT", -2, -2)
+    closeBtn:SetScript("OnClick", function() msf:Hide() end)
+
+    -- 预设模型按钮列表
+    local btnW = 200
+    local btnH = 28
+    local startY = -42
+    local gap = 4
+
+    for i, preset in ipairs(UI.MODEL_PRESETS) do
+        local btn = CreateFrame("Button", nil, msf, "BackdropTemplate")
+        btn:SetSize(btnW, btnH)
+        btn:SetPoint("TOP", msf, "TOP", 0, startY - (i - 1) * (btnH + gap))
+        btn:SetBackdrop({
+            bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
+            edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+            tileSize = 8, edgeSize = 8,
+            insets = { left = 2, right = 2, top = 2, bottom = 2 }
+        })
+        btn:SetBackdropColor(0.08, 0.04, 0.12, 0.85)
+        btn:SetBackdropBorderColor(0.55, 0.4, 0.08, 0.7)
+
+        local btnLabel = btn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+        btnLabel:SetPoint("CENTER", btn, "CENTER", 0, 0)
+        btnLabel:SetText(preset.name)
+
+        btn.displayId = preset.id
+        btn:SetScript("OnClick", function(self)
+            UI:SetSisterModel(self.displayId)
+            msf:Hide()
+        end)
+        btn:SetScript("OnEnter", function(self)
+            self:SetBackdropBorderColor(0.85, 0.65, 0.13, 1)
+        end)
+        btn:SetScript("OnLeave", function(self)
+            self:SetBackdropBorderColor(0.55, 0.4, 0.08, 0.7)
+        end)
+    end
+
+    -- 自定义模型ID输入区
+    local customY = startY - #UI.MODEL_PRESETS * (btnH + gap) - 10
+
+    local divider = msf:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    divider:SetPoint("TOP", msf, "TOP", 0, customY)
+    divider:SetText("|cFF888888──────── 自定义模型 ────────|r")
+
+    local inputBg = CreateFrame("Frame", nil, msf, "BackdropTemplate")
+    inputBg:SetSize(180, 28)
+    inputBg:SetPoint("TOP", divider, "BOTTOM", 0, -6)
+    inputBg:SetBackdrop({
+        bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
+        edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+        tileSize = 8, edgeSize = 8,
+        insets = { left = 2, right = 2, top = 2, bottom = 2 }
+    })
+    inputBg:SetBackdropColor(0.04, 0.02, 0.08, 0.9)
+    inputBg:SetBackdropBorderColor(0.55, 0.4, 0.08, 0.7)
+
+    local inputBox = CreateFrame("EditBox", nil, inputBg)
+    inputBox:SetSize(155, 20)
+    inputBox:SetPoint("LEFT", inputBg, "LEFT", 6, 0)
+    inputBox:SetFontObject("GameFontHighlightSmall")
+    inputBox:SetTextColor(1, 0.9, 0.7)
+    inputBox:SetAutoFocus(false)
+    inputBox:SetNumeric(true)
+    local inputPlaceholder = "输入 DisplayID"
+    inputBox:SetText(inputPlaceholder)
+    inputBox:SetTextColor(0.4, 0.4, 0.4)
+    inputBox:SetScript("OnEditFocusGained", function(self)
+        if self:GetText() == inputPlaceholder then
+            self:SetText("")
+            self:SetTextColor(1, 0.9, 0.7)
+        end
+    end)
+    inputBox:SetScript("OnEditFocusLost", function(self)
+        if self:GetText() == "" then
+            self:SetText(inputPlaceholder)
+            self:SetTextColor(0.4, 0.4, 0.4)
+        end
+    end)
+    inputBox:SetScript("OnEnterPressed", function(self)
+        local id = tonumber(self:GetText())
+        if id and id > 0 then
+            UI:SetSisterModel(id)
+            msf:Hide()
+        end
+    end)
+
+    local applyBtn = CreateFrame("Button", nil, msf, "BackdropTemplate")
+    applyBtn:SetSize(50, 24)
+    applyBtn:SetPoint("TOP", inputBg, "BOTTOM", 0, -6)
+    applyBtn:SetBackdrop({
+        bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
+        edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+        tileSize = 8, edgeSize = 8,
+        insets = { left = 2, right = 2, top = 2, bottom = 2 }
+    })
+    applyBtn:SetBackdropColor(0.1, 0.05, 0.18, 0.9)
+    applyBtn:SetBackdropBorderColor(0.85, 0.65, 0.13, 0.8)
+    local applyLabel = applyBtn:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    applyLabel:SetPoint("CENTER", applyBtn, "CENTER", 0, 0)
+    applyLabel:SetText("|cFFFFD700应用|r")
+    applyBtn:SetScript("OnClick", function()
+        local id = tonumber(inputBox:GetText())
+        if id and id > 0 then
+            UI:SetSisterModel(id)
+            msf:Hide()
+        end
+    end)
+    applyBtn:SetScript("OnEnter", function(self)
+        self:SetBackdropBorderColor(1, 0.85, 0.3, 1)
+    end)
+    applyBtn:SetScript("OnLeave", function(self)
+        self:SetBackdropBorderColor(0.85, 0.65, 0.13, 0.8)
+    end)
+
+    -- 底部提示
+    local tip = msf:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    tip:SetPoint("BOTTOM", msf, "BOTTOM", 0, 10)
+    tip:SetText("|cFF44AAFF输入 /wcsi scan 扫描可用模型|r")
+
+    msf:Hide()
+    self.modelSelectFrame = msf
+end
+
+function UI:SetSisterModel(displayId)
+    local mf = self.modelFrame
+    if not mf then return end
+
+    local ok = pcall(function()
+        mf:ClearModel()
+        mf:SetDisplayInfo(displayId)
+    end)
+
+    if ok and ModelIsLoaded(mf) then
+        self:ApplyModelSettings()
+        TrySetAnimation(mf, UI.ANIM.IDLE, 0)
+        self.currentMethod = "SetDisplayInfo"
+        self.currentParam = displayId
+        WoWCultivationCharDB = WoWCultivationCharDB or {}
+        WoWCultivationCharDB.sisterDisplayId = displayId
+        WoWCultivation:Print("|cFF00FF00小师妹模型已更换 (DisplayID: " .. displayId .. ")|r")
+        return true
+    else
+        WoWCultivation:Print("|cFFFF0000模型加载失败 (DisplayID: " .. displayId .. ")|r")
+        return false
+    end
+end
+
+function UI:ToggleModelSelect()
+    if not self.modelSelectFrame then
+        self:CreateModelSelectFrame()
+    end
+    local msf = self.modelSelectFrame
+    if msf:IsShown() then
+        msf:Hide()
+    else
+        msf:Show()
+    end
+end
+
 function UI:CreateRadialMenu()
     self.radialMenu = CreateFrame("Frame", "WoWCultivationRadialMenu", UIParent)
     local rm = self.radialMenu
@@ -541,7 +826,23 @@ function UI:HideRadialMenu()
 end
 
 function UI:ExecuteRadialAction(action)
-    if action == "talk" then
+    if action == "guide" then
+        -- 修炼指引：根据等级给出修炼建议
+        local Guide = WoWCultivation.Data and WoWCultivation.Data.CultivationGuide
+        local level = UnitLevel("player") or 1
+        local text
+        if Guide then
+            text = Guide:GetGuideForLevel(level)
+            -- 满级特殊提示
+            local tip = Guide:GetLevelTip(level)
+            if tip then
+                text = text .. "\n\n|cFFAAFFAA" .. tip .. "|r"
+            end
+        else
+            text = "修炼指引尚未加载..."
+        end
+        self:ShowDialog(text, 20)  -- 长文本显示20秒
+    elseif action == "talk" then
         local SisterModule = WoWCultivation.Modules and WoWCultivation.Modules.SisterModule
         if SisterModule and SisterModule.OnSisterClick then
             SisterModule:OnSisterClick()
@@ -557,6 +858,8 @@ function UI:ExecuteRadialAction(action)
         if WoWCultivation.UI.MainFrame then
             WoWCultivation.UI.MainFrame:Toggle()
         end
+    elseif action == "modelselect" then
+        self:ToggleModelSelect()
     elseif action == "settings" then
         if WoWCultivation.UI.OptionsFrame then
             WoWCultivation.UI.OptionsFrame:Toggle()
@@ -591,8 +894,12 @@ function UI:PlayTalkAnimation()
     if self.isDancing then
         self.isDancing = false
     end
-    local anim = UI.TALK_ANIMS[math.random(1, #UI.TALK_ANIMS)]
-    TrySetAnimation(mf, anim, 0)
+    -- 从候选列表中选择第一个模型支持的说话动画
+    local usedAnim = TrySetAnimationFromList(mf, UI.TALK_ANIMS, 0)
+    if not usedAnim then
+        -- 如果没有任何说话动画可用，回退到IDLE
+        TrySetAnimation(mf, UI.ANIM.IDLE, 0)
+    end
     self.isTalking = true
     SafeTimer(4, function()
         self.isTalking = false
@@ -612,7 +919,7 @@ function UI:PlayDanceAnimation()
     local mf = self.modelFrame
     if not mf then return end
     self.isDancing = true
-    TrySetAnimation(mf, UI.ANIM.DANCE, 0)
+    TrySetAnimationFromList(mf, { UI.ANIM.EMOTE_DANCE, UI.ANIM.IDLE }, 0)
     SafeTimer(10, function()
         self.isDancing = false
         UI:PlayIdleAnimation()
@@ -622,7 +929,7 @@ end
 function UI:PlayLaughAnimation()
     local mf = self.modelFrame
     if not mf then return end
-    TrySetAnimation(mf, UI.ANIM.LAUGH, 0)
+    TrySetAnimationFromList(mf, { UI.ANIM.EMOTE_LAUGH, UI.ANIM.IDLE }, 0)
     SafeTimer(3, function()
         if not self.isTalking and not self.isDancing then
             UI:PlayIdleAnimation()
@@ -648,25 +955,49 @@ function UI:StartIdleAnimation()
         local mf = UI.modelFrame
         if not mf then return end
 
+        -- 空闲动画列表：每个条目是一组候选动画（按优先级排列）
+        local idleAnimChoices = {
+            { anims = { UI.ANIM.EMOTE_DANCE }, duration = 10 },
+            { anims = { UI.ANIM.EMOTE_LAUGH }, duration = 3 },
+            { anims = { UI.ANIM.EMOTE_WAVE }, duration = 3 },
+            { anims = { UI.ANIM.EMOTE_SHY }, duration = 3 },
+            { anims = { UI.ANIM.EMOTE_KISS }, duration = 3 },
+            { anims = { UI.ANIM.EMOTE_CHEER }, duration = 3 },
+            { anims = { UI.ANIM.EMOTE_TALK }, duration = 3 },
+            { anims = { UI.ANIM.IDLE }, duration = 0 },
+        }
+
         local roll = math.random()
-        if roll < 0.25 then
-            UI:PlayDanceAnimation()
+        local choice
+        if roll < 0.15 then
+            choice = idleAnimChoices[1]  -- 跳舞
+        elseif roll < 0.30 then
+            choice = idleAnimChoices[2]  -- 笑
         elseif roll < 0.45 then
-            UI:PlayLaughAnimation()
-        elseif roll < 0.60 then
-            TrySetAnimation(mf, UI.ANIM.WAVE, 0)
-            SafeTimer(3, function() if not UI.isTalking and not UI.isDancing then UI:PlayIdleAnimation() end end)
-        elseif roll < 0.72 then
-            TrySetAnimation(mf, UI.ANIM.SHY, 0)
-            SafeTimer(3, function() if not UI.isTalking and not UI.isDancing then UI:PlayIdleAnimation() end end)
-        elseif roll < 0.82 then
-            TrySetAnimation(mf, UI.ANIM.KISS, 0)
-            SafeTimer(3, function() if not UI.isTalking and not UI.isDancing then UI:PlayIdleAnimation() end end)
-        elseif roll < 0.90 then
-            TrySetAnimation(mf, UI.ANIM.CHEER, 0)
-            SafeTimer(3, function() if not UI.isTalking and not UI.isDancing then UI:PlayIdleAnimation() end end)
+            choice = idleAnimChoices[3]  -- 挥手
+        elseif roll < 0.55 then
+            choice = idleAnimChoices[4]  -- 害羞
+        elseif roll < 0.65 then
+            choice = idleAnimChoices[5]  -- 飞吻
+        elseif roll < 0.75 then
+            choice = idleAnimChoices[6]  -- 欢呼
+        elseif roll < 0.85 then
+            choice = idleAnimChoices[7]  -- 说话
         else
-            TrySetAnimation(mf, UI.ANIM.IDLE, 0)
+            choice = idleAnimChoices[8]  -- 待机
+        end
+
+        local usedAnim = TrySetAnimationFromList(mf, choice.anims, 0)
+        if choice.duration > 0 and usedAnim then
+            if usedAnim == UI.ANIM.EMOTE_DANCE then
+                UI.isDancing = true
+            end
+            SafeTimer(choice.duration, function()
+                UI.isDancing = false
+                if not UI.isTalking and not UI.isDancing then
+                    UI:PlayIdleAnimation()
+                end
+            end)
         end
     end)
 end
@@ -864,11 +1195,34 @@ function UI:HandleSlashCommand(msg)
         if animId then
             local mf = self.modelFrame
             if mf then
-                TrySetAnimation(mf, animId, 0)
-                print("|cFF00FF00[修仙传]|r 播放动画: " .. animId)
+                local hasIt = ModelHasAnim(mf, animId)
+                if hasIt then
+                    TrySetAnimation(mf, animId, 0)
+                    print("|cFF00FF00[修仙传]|r 播放动画: " .. animId .. " (模型支持)")
+                else
+                    print("|cFFFF0000[修仙传]|r 动画 " .. animId .. " 当前模型不支持!")
+                end
             end
         else
             print("|cFF00FF00[修仙传]|r 用法: /wcsi anim <ANIM_ID>")
+        end
+
+    elseif msg:find("^animkit ") then
+        local kitId = tonumber(msg:match("animkit (%d+)"))
+        if kitId then
+            local mf = self.modelFrame
+            if mf then
+                local ok = pcall(function()
+                    mf:PlayAnimKit(kitId, false)
+                end)
+                if ok then
+                    print("|cFF00FF00[修仙传]|r 播放AnimKit: " .. kitId)
+                else
+                    print("|cFFFF0000[修仙传]|r AnimKit " .. kitId .. " 播放失败")
+                end
+            end
+        else
+            print("|cFF00FF00[修仙传]|r 用法: /wcsi animkit <ANIMKIT_ID>")
         end
 
     elseif msg:find("^unit") then
@@ -888,6 +1242,9 @@ function UI:HandleSlashCommand(msg)
     elseif msg == "scan" then
         self:ScanDisplayIds()
 
+    elseif msg == "probe" then
+        self:ProbeAnimations()
+
     elseif msg == "debug" then
         self:DumpDebugInfo()
 
@@ -905,13 +1262,15 @@ function UI:HandleSlashCommand(msg)
         print("  /wcsi - 查看模型信息")
         print("  /wcsi creature <ID> - 测试NPC模型")
         print("  /wcsi display <ID> - 测试DisplayInfo")
-        print("  /wcsi anim <ID> - 播放动画")
+        print("  /wcsi anim <ID> - 播放动画(AnimationDataEnum)")
+        print("  /wcsi animkit <ID> - 播放AnimKit")
         print("  /wcsi unit - 使用玩家模型")
         print("  /wcsi reload - 重新加载模型")
         print("  /wcsi resetmodel - 清除保存的模型ID并重新加载")
         print("  /wcsi dance - 跳舞")
         print("  /wcsi talk - 说话动画")
         print("  /wcsi laugh - 笑")
+        print("  /wcsi probe - 探测模型支持的动画")
         print("  /wcsi scan - 扫描可用DisplayID")
         print("  /wcsi debug - 调试信息")
     end
@@ -1025,6 +1384,90 @@ function UI:ScanDisplayIds()
     self:LoadModel()
 end
 
+function UI:ProbeAnimations()
+    local mf = self.modelFrame
+    if not mf then print("|cFFFF0000[修仙传]|r 模型框架不存在") return end
+
+    print("|cFF00FF00[修仙传]|r === 探测模型动画支持 ===")
+
+    local displayId = "未知"
+    pcall(function() displayId = tostring(mf:GetDisplayInfo()) end)
+    print("  当前DisplayID: " .. displayId)
+
+    -- 标准动画检测
+    local animNames = {
+        {0,   "Stand/Idle"},
+        {1,   "Death"},
+        {2,   "SpellOmni"},
+        {7,   "SpellArea"},
+        {8,   "Ready1H"},
+        {22,  "Run"},
+        {23,  "Walk"},
+        {60,  "EmoteTalk"},
+        {61,  "EmoteTalkNoSheath"},
+        {62,  "EmotePoint"},
+        {63,  "EmoteSalute"},
+        {64,  "EmoteDance"},
+        {65,  "EmoteLaugh"},
+        {66,  "EmoteWave"},
+        {67,  "EmoteCheer"},
+        {68,  "EmoteRude"},
+        {69,  "EmoteShy"},
+        {70,  "EmoteKiss"},
+        {71,  "EmoteCry"},
+        {72,  "EmoteYes"},
+        {73,  "EmoteNo"},
+        {80,  "Sit"},
+        {82,  "Sleep"},
+    }
+
+    local supported = {}
+    local unsupported = {}
+    for _, entry in ipairs(animNames) do
+        local id, name = entry[1], entry[2]
+        if ModelHasAnim(mf, id) then
+            table.insert(supported, { id = id, name = name })
+        else
+            table.insert(unsupported, { id = id, name = name })
+        end
+    end
+
+    print("|cFF00FF00[修仙传]|r --- 支持的动画 ---")
+    for _, entry in ipairs(supported) do
+        print("  |cFF00FF00✓|r ID=" .. entry.id .. " " .. entry.name)
+    end
+
+    print("|cFF00FF00[修仙传]|r --- 不支持的动画 ---")
+    for _, entry in ipairs(unsupported) do
+        print("  |cFFFF0000✗|r ID=" .. entry.id .. " " .. entry.name)
+    end
+
+    print("|cFF00FF00[修仙传]|r 共 " .. #supported .. " 个支持, " .. #unsupported .. " 个不支持")
+
+    -- 额外：扫描 ID 0-150 范围内所有可用动画
+    print("|cFF00FF00[修仙传]|r --- 扫描 0-150 范围 ---")
+    local extraFound = {}
+    local knownIds = {}
+    for _, entry in ipairs(animNames) do
+        knownIds[entry[1]] = entry[2]
+    end
+    for id = 0, 150 do
+        if ModelHasAnim(mf, id) then
+            if not knownIds[id] then
+                table.insert(extraFound, id)
+            end
+        end
+    end
+    if #extraFound > 0 then
+        print("  额外可用ID: " .. table.concat(extraFound, ", "))
+    else
+        print("  无额外可用动画")
+    end
+
+    -- 恢复待机
+    TrySetAnimation(mf, UI.ANIM.IDLE, 0)
+end
+
 function UI:DumpDebugInfo()
     print("|cFF00FF00[修仙传]|r === 调试信息 ===")
     print("  frame存在: " .. tostring(self.frame ~= nil))
@@ -1040,14 +1483,11 @@ function UI:DumpDebugInfo()
         print("  GetModelFileID: " .. tostring(fileId) .. " (ok=" .. tostring(ok1) .. ")")
         local ok2, displayId = pcall(function() return self.modelFrame:GetDisplayInfo() end)
         print("  GetDisplayInfo: " .. tostring(displayId) .. " (ok=" .. tostring(ok2) .. ")")
-        local ok3, hasAnim = pcall(function() return self.modelFrame:HasAnimation(0) end)
-        print("  HasAnimation(0/idle): " .. tostring(hasAnim) .. " (ok=" .. tostring(ok3) .. ")")
-        local ok4, hasDance = pcall(function() return self.modelFrame:HasAnimation(10) end)
-        print("  HasAnimation(10/dance): " .. tostring(hasDance) .. " (ok=" .. tostring(ok4) .. ")")
-        local ok5, hasTalk = pcall(function() return self.modelFrame:HasAnimation(1) end)
-        print("  HasAnimation(1/talk): " .. tostring(hasTalk) .. " (ok=" .. tostring(ok5) .. ")")
-        local ok6, hasEmoteDance = pcall(function() return self.modelFrame:HasAnimation(94) end)
-        print("  HasAnimation(94/emote_dance): " .. tostring(hasEmoteDance) .. " (ok=" .. tostring(ok6) .. ")")
+        print("  HasAnimation(0/Idle): " .. tostring(ModelHasAnim(self.modelFrame, 0)))
+        print("  HasAnimation(60/EmoteTalk): " .. tostring(ModelHasAnim(self.modelFrame, 60)))
+        print("  HasAnimation(64/EmoteDance): " .. tostring(ModelHasAnim(self.modelFrame, 64)))
+        print("  HasAnimation(65/EmoteLaugh): " .. tostring(ModelHasAnim(self.modelFrame, 65)))
+        print("  HasAnimation(8/Ready1H): " .. tostring(ModelHasAnim(self.modelFrame, 8)))
     end
 
     local raceName = UnitRace("player")
@@ -1128,30 +1568,39 @@ function UI:ShowCultivationFlash(logType, detail)
     end)
 end
 
-function UI:ShowDialog(text)
+function UI:ShowDialog(text, duration)
     local db = self.dialogBubble
     if not db then return end
 
-    if self.dialogTimer then
-        self.dialogTimer:Cancel()
-        self.dialogTimer = nil
+    if self.dialogHideTimer then
+        -- 已有的隐藏计时器不再执行
+        self.dialogHideTimer = nil
     end
+
+    -- 根据文本长度动态调整气泡大小
+    local w = math.max(240, math.min(380, #text * 1.5 + 30))
+    local estimatedLines = math.ceil(#text / 14) + 1
+    local h = math.max(66, math.min(420, estimatedLines * 16 + 16))
+    db:SetWidth(w)
+    db:SetHeight(h)
 
     db.text:SetText(text)
     db:Show()
+    if db.closeHint then db.closeHint:Show() end
 
     self:PlayTalkAnimation()
 
-    self.dialogTimer = C_Timer.NewTimer(UI.DIALOG_DURATION, function()
-        if db then db:Hide() end
-        UI:PlayIdleAnimation()
-        UI.dialogTimer = nil
+    local showTime = duration or UI.DIALOG_DURATION
+    SafeTimer(showTime, function()
+        UI:HideDialog()
     end)
 end
 
 function UI:HideDialog()
     local db = self.dialogBubble
-    if db then db:Hide() end
+    if not db then return end
+    db:Hide()
+    self:PlayIdleAnimation()
 end
 
 function UI:Toggle()

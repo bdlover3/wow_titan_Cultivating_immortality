@@ -14,8 +14,8 @@ UI.QUALITY_INFO = {
     [2] = { name = "灵器",     color = "|cFF1eff00", bgColor = {0.07, 0.5, 0} },
     [3] = { name = "宝器",     color = "|cFF0070dd", bgColor = {0, 0.22, 0.43} },
     [4] = { name = "灵宝",     color = "|cFFa335ee", bgColor = {0.32, 0.1, 0.47} },
-    [5] = { name = "仙器",     color = "|cFFff8000", bgColor = {0.5, 0.25, 0} },
-    [6] = { name = "先天灵宝", color = "|cFFe6cc80", bgColor = {0.45, 0.4, 0.25} },
+    [5] = { name = "先天灵宝", color = "|cFFff8000", bgColor = {0.5, 0.25, 0} },
+    [6] = { name = "上界异宝", color = "|cFFe6cc80", bgColor = {0.45, 0.4, 0.25} },
 }
 
 -- 装备槽位图鉴信息
@@ -52,6 +52,7 @@ function UI:OnEnable()
     f:SetBackdropColor(0.06, 0.03, 0.1, 0.97)
     f:SetBackdropBorderColor(0.85, 0.65, 0.13, 1)
     f:SetClampedToScreen(true)
+    f:SetFrameStrata("DIALOG")
     f:EnableMouse(true)
     f:SetMovable(true)
     f:RegisterForDrag("LeftButton")
@@ -144,6 +145,7 @@ function UI:CreateSlotGrid(parent)
         item.slotName = slotInfo.slotName
         item.icon = icon
         item.equipLabel = equipLabel
+        item.defaultIcon = slotInfo.icon
 
         -- 悬停
         item:SetScript("OnEnter", function(self)
@@ -178,13 +180,20 @@ function UI:Refresh()
                     bestQuality = itemRarity
                 end
                 qualityCount[itemRarity] = (qualityCount[itemRarity] or 0) + 1
+                -- 更新为装备物品的图标
+                local itemTexture = GetInventoryItemTexture("player", slotId)
+                if itemTexture then
+                    item.icon:SetTexture(itemTexture)
+                end
             else
                 item.equipLabel:SetText("|cFF666666未装备|r")
                 item:SetBackdropColor(0.04, 0.02, 0.06, 0.9)
+                item.icon:SetTexture(item.defaultIcon or "")
             end
         else
             item.equipLabel:SetText("|cFF666666未装备|r")
             item:SetBackdropColor(0.04, 0.02, 0.06, 0.9)
+            item.icon:SetTexture(item.defaultIcon or "")
         end
     end
 

@@ -46,7 +46,7 @@ function UI:OnEnable()
     -- 标题
     local title = f:CreateFontString(nil, "OVERLAY", "QuestTitleFontBlackShadow")
     title:SetPoint("TOP", f, "TOP", 0, -12)
-    title:SetText("|cFFFFD700✦ 灵 储 物 袋 ✦|r")
+    title:SetText("|cFFFFD700◆ 灵 储 物 袋 ◆|r")
     f.titleText = title
 
     -- 状态栏：物品总数 + 剩余空位
@@ -162,18 +162,23 @@ function UI:RefreshItems()
     end
     self.itemSlots = {}
 
-    -- Collect bag items (WotLK 3.80.1 API)
-    local numSlots = GetContainerNumSlots(bagIndex)
+    -- 3.80.1: 使用 C_Container API（手册确认原生支持）
+    local numSlots = C_Container.GetContainerNumSlots(bagIndex)
     local items = {}
     for slot = 1, numSlots do
-        local tex, itemCount, _, quality, _, _, itemLink = GetContainerItemInfo(bagIndex, slot)
-        if itemLink then
-            quality = quality or 1
-            local itemName = GetItemInfo(itemLink) or itemLink
-            local itemIcon = tex
-            -- If tex is nil, try GetItemInfo for icon
-            if not itemIcon or itemIcon == "" then
-                _, _, _, _, _, _, _, _, _, itemIcon = GetItemInfo(itemLink)
+        local info = C_Container.GetContainerItemInfo(bagIndex, slot)
+        local itemLink = C_Container.GetContainerItemLink(bagIndex, slot)
+        if info and itemLink then
+            local quality = info.quality or info.itemQuality or 1
+            local itemCount = info.stackCount or 1
+            local itemIcon = info.iconFileID or info.icon
+            local itemName = itemLink
+            -- 尝试获取物品名称
+            local name = GetItemInfo(itemLink)
+            if name then itemName = name end
+            -- 如果没有图标，尝试通过C_Item获取
+            if not itemIcon and info.itemID then
+                itemIcon = C_Item.GetItemIconByID(info.itemID)
             end
             table.insert(items, {
                 slot = slot,
@@ -181,7 +186,7 @@ function UI:RefreshItems()
                 name = itemName,
                 quality = quality,
                 icon = itemIcon or "Interface\\Icons\\INV_Misc_QuestionMark",
-                count = itemCount or 1,
+                count = itemCount,
             })
         end
     end
